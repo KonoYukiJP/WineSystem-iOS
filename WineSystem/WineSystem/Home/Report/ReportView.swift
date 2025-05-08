@@ -1,0 +1,78 @@
+//
+//  ReportView.swift
+//  WineSystem
+//
+//  Created by 河野 優輝 on 2024/11/25.
+//
+
+import SwiftUI
+
+struct ReportView: View {
+    @AppStorage("systemId") private var systemId: Int = 0
+    @AppStorage("systemName") private var systemName = "No System"
+    @AppStorage("username") private var username = "No Name"
+    @State var isShowingSystemSettingsView = false
+    @State var isShowingUserSettingsView = false
+    
+    var body: some View {
+        NavigationStack {
+            GeometryReader { geometry in
+                let columnCount = geometry.size.width < 600 ? 2 : 4
+                
+                LazyVGrid(columns: Array(repeating: GridItem(.fixed(144)), count: columnCount), spacing: 0) {
+                    NavigationLink(
+                        destination:
+                            ReportCreateView(),
+                        label: {
+                            TextIcon("日報作成")
+                        }
+                    )
+                    NavigationLink(
+                        destination:
+                            ReportList(),
+                        label: {
+                            TextIcon("日報一覧")
+                        }
+                    )
+                }
+            }
+            .navigationTitle("Daily Report")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: {
+                        isShowingSystemSettingsView = true
+                    }) {
+                        HStack {
+                            Image(systemName: "house")
+                            Text(systemName)
+                        }
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        isShowingUserSettingsView = true
+                    }) {
+                        HStack {
+                            Image(systemName: "person")
+                            Text(username)
+                        }
+                    }
+                }
+            }
+            .sheet(isPresented: $isShowingSystemSettingsView, content: {
+                SystemSettingsView(
+                    isShowingSheet: $isShowingSystemSettingsView
+                )
+            })
+            .sheet(isPresented: $isShowingUserSettingsView, content: {
+                UserSettingsView(
+                    isShowingSheet: $isShowingUserSettingsView
+                )
+            })
+        }
+    }
+}
+
+#Preview {
+    ReportView().ja()
+}
