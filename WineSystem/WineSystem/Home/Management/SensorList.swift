@@ -55,7 +55,21 @@ struct SensorList: View {
                                     Task { await getSensors() }
                                 }),
                         label: {
-                            Text(sensor.name)
+                            VStack(alignment: .leading) {
+                                Text(sensor.name)
+                                Group {
+                                    HStack {
+                                        Text("Unit")
+                                        Text(": \(sensor.unit)")
+                                    }
+                                    HStack {
+                                        Text(tanks.first(where: { $0.id == sensor.tankId})?.name ?? "?")
+                                        Text(sensor.position)
+                                    }
+                                    Text(sensor.date, formatter: dateFormatter)
+                                }
+                                .foregroundStyle(.secondary)
+                            }
                         }
                     )
                 }
@@ -216,7 +230,7 @@ struct SensorEditView: View {
                 HStack {
                     Text("Name")
                     TextField(
-                        "Material Name",
+                        "Sensor Name",
                         text: $newSensorRequest.name
                     )
                     .multilineTextAlignment(.trailing)

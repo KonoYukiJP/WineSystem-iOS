@@ -237,6 +237,17 @@
         }
       }
     },
+    "Get" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取得"
+          }
+        }
+      }
+    },
     "Kind" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -417,6 +428,17 @@
         }
       }
     },
+    "Report" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日報"
+          }
+        }
+      }
+    },
     "Report Detail" : {
       "localizations" : {
         "ja" : {
@@ -540,6 +562,17 @@
         }
       }
     },
+    "Submit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "提出"
+          }
+        }
+      }
+    },
     "System" : {
       "localizations" : {
         "ja" : {
@@ -623,6 +656,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "単位"
+          }
+        }
+      }
+    },
+    "Update" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新"
           }
         }
       }

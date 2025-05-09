@@ -46,7 +46,13 @@ struct MaterialList: View {
                                     Task { await getMaterials() }
                                 }),
                         label: {
-                            Text(material.name)
+                            VStack(alignment: .leading) {
+                                Text(material.name)
+                                if !material.note.isEmpty {
+                                    Text(material.note)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
                         }
                     )
                 }

@@ -55,6 +55,13 @@ struct Management: View {
                             TextIcon("Sensor")
                         }
                     )
+                    NavigationLink(
+                        destination:
+                            ReportList(),
+                        label: {
+                            TextIcon("Report")
+                        }
+                    )
                     ButtonIcon(iconName: "バックアップ", action: {})
                 }
             }

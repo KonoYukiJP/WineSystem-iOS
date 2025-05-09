@@ -59,7 +59,22 @@ struct RoleList: View {
                                     Task { await getRoles() }
                                 }),
                         label: {
-                            Text(role.name)
+                            VStack(alignment: .leading) {
+                                Text(role.name)
+                                VStack(alignment: .leading) {
+                                    ForEach(role.permissions.indices, id: \.self) { index in
+                                        let permission = role.permissions[index]
+                                        let resourceName: LocalizedStringKey = resources.first(where: { $0.id == permission.resourceId })?.localizedResourceName ?? "?"
+                                        let actionName: LocalizedStringKey = actions.first(where: { $0.id == permission.actionId })?.localizedActionName ?? "?"
+                                        HStack(spacing: 0) {
+                                            Text(resourceName)
+                                            Text(": ")
+                                            Text(actionName)
+                                        }
+                                        .foregroundColor(.secondary)
+                                    }
+                                }
+                            }
                         }
                     )
                 }

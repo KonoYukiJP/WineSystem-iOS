@@ -9,21 +9,12 @@ import SwiftUI
 
 struct ReportCreateView: View {
     @AppStorage("systemId") var systemId: Int = 0
-    @State private var workId = 0
-    @State private var works: [Work] = []
+    let work: Work
     @State private var operations: [Operation] = []
-    private var filteredOperations: [Operation] { operations.filter { $0.workId == workId }
+    private var filteredOperations: [Operation] { operations.filter { $0.workId == work.id }
     }
     @State private var alertManager = AlertManager()
     
-    private func getWorks() async {
-        do {
-            works = try await NetworkService.getWorks()
-            workId = works.first!.id
-        } catch let error as NSError {
-            alertManager.show(title: "\(error.code)", message: error.localizedDescription)
-        }
-    }
     private func getOperations() async {
         do {
             operations = try await NetworkService.getOperations()
@@ -34,12 +25,10 @@ struct ReportCreateView: View {
     
     var body: some View {
         Form {
-            Picker(selection: $workId) {
-                ForEach(works) { work in
-                    Text(work.name).tag(work.id)
-                }
-            } label: {
+            HStack {
                 Text("Work")
+                Spacer()
+                Text(work.name)
             }
             
             Section(header: Text("Operation")) {
@@ -47,8 +36,8 @@ struct ReportCreateView: View {
                     NavigationLink(
                         destination:
                             [4, 13, 17].contains(where: { $0 == operation.id })
-                        ? AnyView(FeaturesView(work: works.first(where: { $0.id == workId })!, operation: operation))
-                        : AnyView(ReportPostView(work: works.first(where: { $0.id == workId })!, operation: operation)),
+                        ? AnyView(FeaturesView(work: work, operation: operation))
+                        : AnyView(ReportPostView(work: work, operation: operation)),
                         label: {
                             Text(operation.name)
                         }
@@ -56,10 +45,9 @@ struct ReportCreateView: View {
                 }
             }
         }
-        .navigationTitle("Daily Report")
+        .navigationTitle(work.name)
         .alert(manager: alertManager)
         .task {
-            await getWorks()
             await getOperations()
         }
     }
@@ -134,13 +122,19 @@ struct ReportPostView: View {
     var body: some View {
         Form {
             HStack {
-                Text("Username")
+                Text("User")
                 Spacer()
                 Text(username)
             }
             DatePicker("Date", selection: $date)
             
             Section {}
+            HStack {
+                Text("Work");Spacer();Text(work.localizedWorkName)
+            }
+            HStack {
+                Text("Operation");Spacer();Text(operation.name)
+            }
             if work.id == 1 {
                 Picker(selection: $materialId) {
                     ForEach(materials) { material in
@@ -181,7 +175,7 @@ struct ReportPostView: View {
         .navigationTitle("\(work.name)-\(operation.name)")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Create") {
+                Button("Submit") {
                     Task { await createReport() }
                 }
             }
@@ -192,6 +186,6 @@ struct ReportPostView: View {
 
 #Preview {
     NavigationStack {
-        ReportCreateView()
+        ReportCreateView(work: Work(id: 2, name: "Work"))
     }.ja()
 }

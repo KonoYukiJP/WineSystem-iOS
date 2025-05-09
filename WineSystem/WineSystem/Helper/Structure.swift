@@ -78,11 +78,17 @@ struct ResourcePermission: Identifiable {
 struct Action: Identifiable, Decodable {
     var id: Int
     var name: String
+    var localizedActionName: LocalizedStringKey {
+        LocalizedStringKey(name)
+    }
 }
 
 struct Resource: Identifiable, Decodable {
     var id: Int
     var name: String
+    var localizedResourceName: LocalizedStringKey {
+        LocalizedStringKey(name)
+    }
 }
 
 
@@ -119,6 +125,9 @@ struct Sensor: Identifiable, Decodable {
 struct Work: Identifiable, Hashable, Decodable {
     var id: Int
     var name: String
+    var localizedWorkName: LocalizedStringKey {
+        LocalizedStringKey(name)
+    }
 }
 
 struct Operation: Identifiable, Hashable, Decodable {
@@ -126,6 +135,9 @@ struct Operation: Identifiable, Hashable, Decodable {
     var name: String
     var workId: Int
     
+    var localizedOperationName: LocalizedStringKey {
+        LocalizedStringKey(name)
+    }
     private enum CodingKeys: String, CodingKey {
         case id, name, workId = "work_id"
     }

@@ -28,7 +28,6 @@ struct TankList: View {
             alertManager.show(title: "\(error.code)", message: error.localizedDescription)
         }
     }
-    
     private func deleteTank(at offsets: IndexSet) {
         Task {
             do {
@@ -56,7 +55,17 @@ struct TankList: View {
                                 Task { await getTanks() }
                             }),
                     label: {
-                        Text(tank.name)
+                        VStack(alignment: .leading) {
+                            Text(tank.name)
+                            if let materialName = materials.first(where: { $0.id == tank.materialId })?.name {
+                                Text(materialName)
+                                    .foregroundStyle(.secondary)
+                            }
+                            if !tank.note.isEmpty {
+                                Text(tank.note)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                     }
                 )
             }
@@ -74,8 +83,8 @@ struct TankList: View {
                 materials: materials,
                 onCreateTank: {
                     Task {
-                        await getTanks()
                         await getMaterials()
+                        await getTanks()
                     }
                 }
             )
@@ -215,11 +224,6 @@ struct EditTankView: View {
                     AlertText("Thie field is required.")
                 }
             }
-            
-            Section(header: Text("Note")) {
-                TextEditor(text: $newTankRequest.note)
-                    .frame(minHeight: 64)
-            }
             Picker(selection: $newTankRequest.materialId) {
                 Text("None").tag(nil as Int?)
                 ForEach(materials) { material in
@@ -227,6 +231,10 @@ struct EditTankView: View {
                 }
             } label: {
                 Text("Material")
+            }
+            Section(header: Text("Note")) {
+                TextEditor(text: $newTankRequest.note)
+                    .frame(minHeight: 64)
             }
             
             Section {

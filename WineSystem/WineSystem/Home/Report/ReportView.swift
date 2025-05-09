@@ -13,6 +13,8 @@ struct ReportView: View {
     @AppStorage("username") private var username = "No Name"
     @State var isShowingSystemSettingsView = false
     @State var isShowingUserSettingsView = false
+    @State private var works: [Work] = []
+    @State private var alertManager = AlertManager()
     
     var body: some View {
         NavigationStack {
@@ -20,20 +22,14 @@ struct ReportView: View {
                 let columnCount = geometry.size.width < 600 ? 2 : 4
                 
                 LazyVGrid(columns: Array(repeating: GridItem(.fixed(144)), count: columnCount), spacing: 0) {
-                    NavigationLink(
-                        destination:
-                            ReportCreateView(),
-                        label: {
-                            TextIcon("日報作成")
+                    ForEach(works) { work in
+                        NavigationLink {
+                            ReportCreateView(work: work)
+                        } label: {
+                            TextIcon(work.localizedWorkName)
                         }
-                    )
-                    NavigationLink(
-                        destination:
-                            ReportList(),
-                        label: {
-                            TextIcon("日報一覧")
-                        }
-                    )
+
+                    }
                 }
             }
             .navigationTitle("Daily Report")
@@ -59,6 +55,7 @@ struct ReportView: View {
                     }
                 }
             }
+            .alert(manager: alertManager)
             .sheet(isPresented: $isShowingSystemSettingsView, content: {
                 SystemSettingsView(
                     isShowingSheet: $isShowingSystemSettingsView
@@ -69,6 +66,13 @@ struct ReportView: View {
                     isShowingSheet: $isShowingUserSettingsView
                 )
             })
+            .task {
+                do {
+                    works = try await NetworkService.getWorks()
+                } catch let error as NSError {
+                    alertManager.show(title: "\(error.code)", message: error.localizedDescription)
+                }
+            }
         }
     }
 }
