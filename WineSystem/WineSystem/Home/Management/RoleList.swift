@@ -17,9 +17,9 @@ struct RoleList: View {
     
     private func getRoles() async {
         do {
-            roles = try await NetworkService.getRoles(systemId: systemId)
             resources = try await NetworkService.getResources()
             actions = try await NetworkService.getActions()
+            roles = try await NetworkService.getRoles(systemId: systemId)
         } catch let error as NSError {
             alertManager.show(
                 title: "\(error.code)",
@@ -54,33 +54,21 @@ struct RoleList: View {
                             RoleEditView(
                                 role: role,
                                 resources: resources,
-                                actions: actions,
-                                onUpdateRole: {
-                                    Task { await getRoles() }
-                                }),
+                                actions: actions
+                            ),
                         label: {
-                            VStack(alignment: .leading) {
-                                Text(role.name)
-                                VStack(alignment: .leading) {
-                                    ForEach(role.permissions.indices, id: \.self) { index in
-                                        let permission = role.permissions[index]
-                                        let resourceName: LocalizedStringKey = resources.first(where: { $0.id == permission.resourceId })?.localizedResourceName ?? "?"
-                                        let actionName: LocalizedStringKey = actions.first(where: { $0.id == permission.actionId })?.localizedActionName ?? "?"
-                                        HStack(spacing: 0) {
-                                            Text(resourceName)
-                                            Text(": ")
-                                            Text(actionName)
-                                        }
-                                        .foregroundColor(.secondary)
-                                    }
-                                }
-                            }
+                            RolePermissionList(
+                                role: role,
+                                resources: resources,
+                                actions: actions
+                            )
                         }
                     )
                 }
                 .onDelete(perform: deleteRole)
             }
         }
+        .alert(manager: alertManager)
         .task {
             await getRoles()
         }
@@ -92,6 +80,133 @@ struct RoleList: View {
                     Task { await getRoles() }
                 }
             )
+        }
+    }
+}
+
+struct RolePermissionList: View {
+    let role: Role
+    let resources: [Resource]
+    let actions: [Action]
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text(role.name)
+            ForEach(role.permissions) { permission in
+                HStack {
+                    Text(resources.first(where: { $0.id == permission.resourceId})!.localizedResourceName)
+                    ForEach(permission.actionIds, id: \.self) { actionId in
+                        Text(actions.first(where: { $0.id == actionId})!.localizedActionName)
+                    }
+                }
+            }
+            .foregroundStyle(.secondary)
+        }
+    }
+}
+
+struct RoleEditView: View {
+    @Environment(\.dismiss) private var dismiss
+    let role: Role
+    @State var roleUpdateRequest: RoleUpdateRequest
+    @State private var isAlertingName = false
+    let actions: [Action]
+    let resources: [Resource]
+    @State private var resourcePermissions: [ResourcePermission]
+    @State private var alertManager = AlertManager()
+    @State private var isExpanded = true
+    
+    init(role: Role, resources: [Resource], actions: [Action]) {
+        self.role = role
+        _roleUpdateRequest = State(initialValue: .init(from: role))
+        self.resources = resources
+        self.actions = actions
+        _resourcePermissions = State(initialValue: role.toResourcePermissions(resources: resources, actions: actions))
+    }
+    
+    private func updateRole() async {
+        if roleUpdateRequest.name.isEmpty {
+            isAlertingName = true
+            return
+        }
+        let permissions: [Permission] = resourcePermissions.toPermissions()
+        roleUpdateRequest.inserts = []
+        roleUpdateRequest.deletes = []
+        for resource in resources {
+            let old = Set(role.permissions.first(where: { $0.resourceId == resource.id })?.actionIds ?? [])
+            let new = Set(permissions.first(where: { $0.resourceId == resource.id })?.actionIds ?? [])
+            let insertsActionIds = Array(new.subtracting(old))
+            if !insertsActionIds.isEmpty {
+                roleUpdateRequest.inserts.append(Permission(resourceId: resource.id, actionIds: insertsActionIds))
+            }
+            let deletesActionIds = Array(old.subtracting(new))
+            if !deletesActionIds.isEmpty {
+                roleUpdateRequest.deletes.append(Permission(resourceId: resource.id, actionIds: deletesActionIds))
+            }
+        }
+        do {
+            try await NetworkService.updateRole(roleId: role.id, roleUpdateRequest: roleUpdateRequest)
+            dismiss()
+        } catch let error as NSError {
+            alertManager.show(title: "\(error.code)", message: error.localizedDescription)
+        }
+    }
+    private func deleteRole() {
+        Task {
+            do {
+                try await NetworkService.deleteRole(roleId: role.id)
+                dismiss()
+            } catch let error as NSError {
+                alertManager.show(title: "\(error.code)", message: error.localizedDescription)
+            }
+        }
+    }
+    
+    var body: some View {
+        Form {
+            VStack(alignment: .leading) {
+                TextField(
+                    "Role Name",
+                    text: $roleUpdateRequest.name
+                )
+                .onChange(of: roleUpdateRequest.name) {
+                    isAlertingName = false
+                }
+                if isAlertingName {
+                    AlertText("Thie field is required.")
+                }
+            }
+            
+            Section() {}
+            ForEach(resourcePermissions) { resource in
+                let resourceIndex = resourcePermissions.firstIndex(where: { $0.id == resource.id })!
+                DisclosureGroup(resources.first(where: { $0.id == resource.id})!.localizedResourceName, isExpanded: $isExpanded) {
+                    ForEach(resource.actionPermissions) { action in
+                        let actionIndex = resourcePermissions[resourceIndex].actionPermissions.firstIndex(where: { $0.id == action.id })!
+                        Toggle(
+                            actions.first(where: { $0.id == action.id })!.localizedActionName,
+                            isOn: $resourcePermissions[resourceIndex].actionPermissions[actionIndex].isPermitted
+                        )
+                        
+                    }
+                }
+            }
+            .listStyle(.sidebar)
+            
+            Section {
+                Button("Delete") {
+                    deleteRole()
+                }
+                .foregroundStyle(.red)
+            }
+        }
+        .navigationTitle("Role Details")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Save") {
+                    Task { await updateRole() }
+                }
+            }
         }
         .alert(manager: alertManager)
     }
@@ -146,123 +261,6 @@ struct RoleCreateView: View {
             }
             .alert(manager: alertManager)
         }
-    }
-}
-
-struct RoleEditView: View {
-    @Environment(\.dismiss) private var dismiss
-    let role: Role
-    @State var roleUpdateRequest: RoleUpdateRequest
-    let onUpdateRole: () -> Void
-    @State private var isAlertingName = false
-    var actions: [Action]
-    var resources: [Resource]
-    @State private var resourcePermissions: [ResourcePermission]
-    @State private var alertManager = AlertManager()
-    @State private var isExpanded = true
-    
-    init(role: Role, resources: [Resource], actions: [Action], onUpdateRole: @escaping () -> Void) {
-        self.role = role
-        _roleUpdateRequest = State(initialValue: .init(from: role))
-        self.resources = resources
-        self.actions = actions
-        var resourcePermissions: [ResourcePermission] = []
-        for resource in resources {
-            var resourceActions: [ActionPermission] = []
-            for action in actions {
-                let isPermitted = role.permissions.contains {
-                    $0.resourceId == resource.id && $0.actionId == action.id
-                }
-                resourceActions.append(ActionPermission(id: action.id, actionName: action.name, isPermitted: isPermitted))
-            }
-            resourcePermissions.append(ResourcePermission(id: resource.id, resourceName: resource.name, actionPermissions: resourceActions))
-        }
-        _resourcePermissions = State(initialValue: resourcePermissions)
-        self.onUpdateRole = onUpdateRole
-    }
-    
-    private func updateRole() async {
-        if roleUpdateRequest.name.isEmpty {
-            isAlertingName = true
-            return
-        }
-        let permissions: [Permission] = resourcePermissions.flatMap { resourcePermission in
-            resourcePermission.actionPermissions
-                .filter { $0.isPermitted }
-                .map { Permission(resourceId: resourcePermission.id, actionId: $0.id) }
-        }
-        let old = Set(role.permissions)
-        let new = Set(permissions)
-        let insert: [Permission] = Array(new.subtracting(old))
-        let delete: [Permission] = Array(old.subtracting(new))
-        roleUpdateRequest.permissionsPatch = PermissionsPatch(insert: insert, delete: delete)
-        do {
-            try await NetworkService.updateRole(roleId: role.id, roleUpdateRequest: roleUpdateRequest)
-            onUpdateRole()
-            dismiss()
-        } catch let error as NSError {
-            alertManager.show(title: "\(error.code)", message: error.localizedDescription)
-        }
-    }
-    private func deleteRole() {
-        Task {
-            do {
-                try await NetworkService.deleteRole(roleId: role.id)
-                onUpdateRole()
-                dismiss()
-            } catch let error as NSError {
-                alertManager.show(title: "\(error.code)", message: error.localizedDescription)
-            }
-        }
-    }
-    
-    var body: some View {
-        Form {
-            VStack(alignment: .leading) {
-                TextField(
-                    "Role Name",
-                    text: $roleUpdateRequest.name
-                )
-                .onChange(of: roleUpdateRequest.name) {
-                    isAlertingName = false
-                }
-                if isAlertingName {
-                    AlertText("Thie field is required.")
-                }
-            }
-            
-            Section() {}
-            ForEach(resourcePermissions) { resource in
-                let resourceIndex = resourcePermissions.firstIndex(where: { $0.id == resource.id })!
-                DisclosureGroup(resource.localizedResourceName, isExpanded: $isExpanded) {
-                    ForEach(resource.actionPermissions) { action in
-                        let actionIndex = resourcePermissions[resourceIndex].actionPermissions.firstIndex(where: { $0.id == action.id })!
-                        Toggle(
-                            action.localizedActionName,
-                            isOn: $resourcePermissions[resourceIndex].actionPermissions[actionIndex].isPermitted
-                        )
-                        
-                    }
-                }
-            }
-            .listStyle(.sidebar)
-            
-            Section {
-                Button("Delete") {
-                    deleteRole()
-                }
-                .foregroundStyle(.red)
-            }
-        }
-        .navigationTitle("Role Details")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Save") {
-                    Task { await updateRole() }
-                }
-            }
-        }
-        .alert(manager: alertManager)
     }
 }
 

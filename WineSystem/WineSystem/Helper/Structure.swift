@@ -38,15 +38,15 @@ struct User: Identifiable, Hashable, Decodable {
     }
 }
 
-struct Permission: Codable, Hashable {
+struct Permission: Identifiable, Codable, Hashable {
+    var id: Int { resourceId }
     let resourceId: Int
-    let actionId: Int
+    let actionIds: [Int]
     
     private enum CodingKeys: String, CodingKey {
-        case resourceId = "resource_id", actionId = "action_id"
+        case resourceId = "resource_id", actionIds = "action_ids"
     }
 }
-
 struct Role: Identifiable, Codable {
     let id: Int
     let name: String
@@ -59,20 +59,11 @@ struct Role: Identifiable, Codable {
 
 struct ActionPermission: Identifiable {
     let id: Int
-    var actionName: String
     var isPermitted: Bool
-    var localizedActionName: LocalizedStringKey {
-        LocalizedStringKey(actionName)
-    }
-    
 }
 struct ResourcePermission: Identifiable {
     let id: Int
-    var resourceName: String
     var actionPermissions: [ActionPermission]
-    var localizedResourceName: LocalizedStringKey {
-        LocalizedStringKey(resourceName)
-    }
 }
 
 struct Action: Identifiable, Decodable {
@@ -184,4 +175,43 @@ struct Report: Identifiable, Decodable {
     return formatter
 }
 
+extension Role {
+    func toResourcePermissions(
+            resources: [Resource],
+            actions: [Action]
+        ) -> [ResourcePermission] {
+            return resources.map { resource in
+                let permittedActionIds = permissions
+                    .first(where: { $0.resourceId == resource.id })?
+                    .actionIds ?? []
 
+                let actionPermissions = actions.map { action in
+                    ActionPermission(
+                        id: action.id,
+                        isPermitted: permittedActionIds.contains(action.id)
+                    )
+                }
+
+                return ResourcePermission(
+                    id: resource.id,
+                    actionPermissions: actionPermissions
+                )
+            }
+        }
+}
+extension Array where Element == ResourcePermission {
+    func toPermissions() -> [Permission] {
+        self.compactMap { resource in
+            let permittedActionIds = resource.actionPermissions
+                .filter { $0.isPermitted }
+                .map { $0.id }
+
+            guard !permittedActionIds.isEmpty else { return nil }
+
+            return Permission(
+                resourceId: resource.id,
+                actionIds: permittedActionIds
+            )
+        }
+    }
+}

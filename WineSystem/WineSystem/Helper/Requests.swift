@@ -97,16 +97,18 @@ struct PasswordUpdateRequest: Encodable {
         case newPassword = "new_password"
     }
 }
-struct PermissionsPatch: Encodable {
-    var insert: [Permission]
-    var delete: [Permission]
+
+struct ResourceActionPair: Hashable, Encodable {
+    var resourceId: Int
+    var actionId: Int
+    private enum CodingKeys: String, CodingKey {
+        case resourceId = "resource_id", actionId = "action_id"
+    }
 }
 struct RoleUpdateRequest: Encodable {
     var name: String
-    var permissionsPatch: PermissionsPatch
-    private enum CodingKeys: String, CodingKey {
-        case name, permissionsPatch = "permissions_patch"
-    }
+    var inserts: [Permission]
+    var deletes: [Permission]
 }
 
 extension LoginRequest {
@@ -155,7 +157,8 @@ extension PasswordUpdateRequest {
 extension RoleUpdateRequest {
     init(from role: Role) {
         self.name = role.name
-        self.permissionsPatch = PermissionsPatch(insert: [], delete: [])
+        self.inserts = []
+        self.deletes = []
     }
 }
 extension NewMaterialRequest {
