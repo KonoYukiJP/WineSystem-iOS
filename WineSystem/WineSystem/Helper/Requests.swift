@@ -110,7 +110,12 @@ struct RoleUpdateRequest: Encodable {
     var inserts: [Permission]
     var deletes: [Permission]
 }
-
+struct BackupCreateRequest: Encodable {
+    
+}
+struct BackupUpdateRequest: Encodable {
+    let filename: String
+}
 extension LoginRequest {
     init() {
         systemId = 0

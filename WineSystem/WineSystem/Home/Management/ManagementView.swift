@@ -62,7 +62,13 @@ struct Management: View {
                             TextIcon("Report")
                         }
                     )
-                    ButtonIcon(iconName: "バックアップ", action: {})
+                    NavigationLink(
+                        destination:
+                            BackupList(),
+                        label: {
+                            TextIcon("Backup")
+                        }
+                    )
                 }
             }
             .navigationTitle("Management")

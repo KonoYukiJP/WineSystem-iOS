@@ -56,15 +56,20 @@ struct SensorList: View {
                                 }),
                         label: {
                             VStack(alignment: .leading) {
-                                Text(sensor.name)
+                                HStack {
+                                    Text(sensor.name)
+                                    Text("\(sensor.unit)")
+                                        .foregroundStyle(.secondary)
+                                }
+                                
                                 Group {
                                     HStack {
-                                        Text("Unit")
-                                        Text(": \(sensor.unit)")
-                                    }
-                                    HStack {
-                                        Text(tanks.first(where: { $0.id == sensor.tankId})?.name ?? "?")
-                                        Text(sensor.position)
+                                        if let tankName = tanks.first(where: { $0.id == sensor.tankId})?.name {
+                                            Text(tankName)
+                                        }
+                                        if !sensor.position.isEmpty {
+                                            Text(sensor.position)
+                                        }
                                     }
                                     Text(sensor.date, formatter: dateFormatter)
                                 }

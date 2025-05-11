@@ -79,6 +79,9 @@ struct NetworkService {
     static func getMaterialsAsItems(systemId: Int) async throws -> [Item] {
         return try await get(path: "/systems/\(systemId)/materials")
     }
+    static func getBackups() async throws -> Backup {
+        return try await get(path: "/backups")
+    }
     private static func post<T: Encodable>(path: String, body: T) async throws {
         guard let url = URL(string: "\(apiRootURL)\(path)") else {
             throw URLError(.badURL)
@@ -119,6 +122,9 @@ struct NetworkService {
     static func createReport(systemId: Int, newReportRequest: NewReportRequest) async throws {
         try await post(path: "/systems/\(systemId)/reports", body: newReportRequest)
     }
+    static func createBackup(backupCreateRequest: BackupCreateRequest) async throws {
+        try await post(path: "/backups", body: backupCreateRequest)
+    }
     private static func put<T: Encodable>(path: String, body: T) async throws {
         guard let url = URL(string: "\(apiRootURL)\(path)") else {
             throw URLError(.badURL)
@@ -155,6 +161,9 @@ struct NetworkService {
     }
     static func updateReport(reportId: Int, newReportRequest: NewReportRequest) async throws {
         try await put(path: "/reports/\(reportId)", body: newReportRequest)
+    }
+    static func updateBackup(backupUpdateRequest: BackupUpdateRequest) async throws {
+        try await put(path: "/backups", body: backupUpdateRequest)
     }
     private static func patch<T: Encodable>(path: String, body: T) async throws {
         guard let url = URL(string: "\(apiRootURL)\(path)") else {
@@ -210,5 +219,8 @@ struct NetworkService {
     }
     static func deleteTank(tankId: Int) async throws {
         try await delete(path: "/tanks/\(tankId)")
+    }
+    static func deleteBackup(filename: String) async throws {
+        try await delete(path: "/backups/\(filename)")
     }
 }

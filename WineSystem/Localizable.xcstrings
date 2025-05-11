@@ -48,6 +48,17 @@
         }
       }
     },
+    "Backup" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バックアップ"
+          }
+        }
+      }
+    },
     "Cancel" : {
       "localizations" : {
         "ja" : {
@@ -129,6 +140,9 @@
           }
         }
       }
+    },
+    "Create Backup" : {
+
     },
     "Create Material" : {
       "localizations" : {
@@ -473,6 +487,9 @@
         }
       }
     },
+    "Restore" : {
+
+    },
     "Role" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -769,15 +786,6 @@
           }
         }
       }
-    },
-    "バックアップ" : {
-
-    },
-    "日報一覧" : {
-
-    },
-    "日報作成" : {
-
     }
   },
   "version" : "1.0"

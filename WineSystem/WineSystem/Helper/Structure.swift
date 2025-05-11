@@ -168,12 +168,18 @@ struct Report: Identifiable, Decodable {
     }
 }
 
- var dateFormatter: DateFormatter {
+struct Backup: Decodable {
+    var backups: [String]
+}
+
+var dateFormatter: DateFormatter {
     let formatter = DateFormatter()
     formatter.dateStyle = .long
     formatter.timeStyle = .short
     return formatter
 }
+
+
 
 extension Role {
     func toResourcePermissions(
