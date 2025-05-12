@@ -15,19 +15,10 @@ struct UserList: View {
     @State private var alertManager = AlertManager()
     @State private var isShowingSheet = false
     
-    private func getRoles() async {
-        do {
-            roles = try await NetworkService.getRoles(systemId: systemId)
-        } catch let error as NSError {
-            alertManager.show(
-                title: "\(error.code)",
-                message: error.localizedDescription
-            )
-        }
-    }
     private func getUsers() async {
         do {
             users = try await NetworkService.getUsers(systemId: systemId)
+            roles = try await NetworkService.getRoles(systemId: systemId)
         } catch let error as NSError {
             alertManager.show(
                 title: "\(error.code)",
@@ -42,7 +33,6 @@ struct UserList: View {
                 action: { isShowingSheet = true },
                 label: { Text("Create User") }
             )
-            .padding(.vertical, 8)
             
             ForEach(roles) { role in
                 Section(header: Text(role.name)) {
@@ -50,20 +40,16 @@ struct UserList: View {
                         NavigationLink(
                             destination: UserEditView(
                                 user: user,
-                                roles: roles,
-                                onUpdateUser: {
-                                    Task { await getUsers() }
-                                }
+                                roles: roles
                             ),
                             label: {
                                 HStack {
                                     Text(user.name)
                                     if !user.isEnabled {
-                                        Image(systemName: "exclamationmark.triangle")
+                                        Image(systemName: "exclamationmark.square")
                                             .foregroundColor(.red)
                                     }
                                 }
-                                .padding(.vertical, 8)
                             }
                         )
                     }
@@ -72,7 +58,6 @@ struct UserList: View {
         }
         .alert(manager: alertManager)
         .task {
-            await getRoles()
             await getUsers()
         }
         .sheet(isPresented: $isShowingSheet, content: {
@@ -93,39 +78,32 @@ struct UserCreateView: View {
     let systemId: Int
     let roles: [Role]
     let onCreateUser: () -> Void
-    @State private var username = ""
-    @State private var password = ""
+    @State private var userCreateRequest = UserCreateRequest()
     @State private var confirmation = ""
     @State private var isAlertingEmptyUsername = false
     @State private var isAlertingShortPassword = false
     @State private var isAlertingWrongPassword = false
-    private var isValidUserInfo: Bool {
-        var isValidUserInfo: Bool = true
-        if username.isEmpty {
-            isAlertingEmptyUsername = true
-            isValidUserInfo = false
-        }
-        if password.count < 4 {
-            isAlertingShortPassword = true
-            isValidUserInfo = false
-        }
-        if password != confirmation {
-            isAlertingWrongPassword = true
-            isValidUserInfo = false
-        }
-        return isValidUserInfo
-    }
-    @State private var roleId = 0
-    @State private var isEnabled = true
     @State private var alertManager = AlertManager()
     
+    private func validateRequest() -> Bool {
+        var isValidRequest: Bool = true
+        if userCreateRequest.name.isEmpty {
+            isAlertingEmptyUsername = true
+            isValidRequest = false
+        }
+        if userCreateRequest.password.count < 4 {
+            isAlertingShortPassword = true
+            isValidRequest = false
+        }
+        if userCreateRequest.password != confirmation {
+            isAlertingWrongPassword = true
+            isValidRequest = false
+        }
+        return isValidRequest
+    }
+    
+    
     private func createUser() async {
-        let userCreateRequest = UserCreateRequest(
-            name: username,
-            password: password,
-            roleId: roleId,
-            isEnabled: isEnabled
-        )
         do {
             try await NetworkService.createUser(systemId: systemId, userCreateRequest: userCreateRequest)
             onCreateUser()
@@ -138,30 +116,29 @@ struct UserCreateView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextFieldWithAlert(
-                    title: "Username",
-                    placeholder: "Required",
-                    text: $username,
-                    showAlert: $isAlertingEmptyUsername,
-                    alertMessage: "This field is required."
-                )
-                Section {
-                    SecureFieldWithAlert(
-                        title: "Password",
-                        placeholder: "Required",
-                        text: $password,
-                        showAlert: $isAlertingShortPassword,
-                        alertMessage: "4 or more characters."
-                    )
-                    SecureFieldWithAlert(
-                        title: "Confirm",
-                        placeholder: "Confirm password",
-                        text: $confirmation,
-                        showAlert: $isAlertingWrongPassword,
-                        alertMessage: "The passwords you entered do not match."
+                Section("User") {
+                    TextFieldWithAlert(
+                        placeholder: "Name",
+                        text: $userCreateRequest.name,
+                        isShowingAlert: $isAlertingEmptyUsername,
+                        alertText: "This field is required."
                     )
                 }
-                Picker(selection: $roleId) {
+                Section("Password") {
+                    SecureFieldWithAlert(
+                        placeholder: "Required",
+                        text: $userCreateRequest.password,
+                        isShowingAlert: $isAlertingShortPassword,
+                        alertText: "4 or more characters."
+                    )
+                    SecureFieldWithAlert(
+                        placeholder: "Confirm password",
+                        text: $confirmation,
+                        isShowingAlert: $isAlertingWrongPassword,
+                        alertText: "The passwords you entered do not match."
+                    )
+                }
+                Picker(selection: $userCreateRequest.roleId) {
                     ForEach(roles) { role in
                         Text(role.name).tag(role.id)
                     }
@@ -169,11 +146,11 @@ struct UserCreateView: View {
                     Text("Role")
                 }
                 .onAppear {
-                    roleId = roles.first!.id
+                    userCreateRequest.roleId = roles.first!.id
                 }
                 Toggle(
                     "Status",
-                    isOn: $isEnabled
+                    isOn: $userCreateRequest.isEnabled
                 )
             }
             .toolbar {
@@ -186,7 +163,7 @@ struct UserCreateView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
-                        if isValidUserInfo {
+                        if validateRequest() {
                             Task { await createUser() }
                         }
                     }) {
@@ -204,14 +181,12 @@ struct UserEditView: View {
     let userId: Int
     @State var userUpdateRequest: UserUpdateRequest
     let roles: [Role]
-    let onUpdateUser: () -> Void
     @State private var alertManager = AlertManager()
     
-    init(user: User, roles: [Role], onUpdateUser: @escaping () -> Void) {
+    init(user: User, roles: [Role]) {
         self.userId = user.id
         _userUpdateRequest = State(initialValue: .init(from: user))
         self.roles = roles
-        self.onUpdateUser = onUpdateUser
     }
     
     private func updateUser() async {
@@ -221,7 +196,6 @@ struct UserEditView: View {
         }
         do {
             try await NetworkService.updateUser(userId: userId, userUpdateRequest: userUpdateRequest)
-            onUpdateUser()
             dismiss()
         } catch let error as NSError {
             alertManager.show(
@@ -234,7 +208,6 @@ struct UserEditView: View {
         Task {
             do {
                 try await NetworkService.deleteUser(userId: userId)
-                onUpdateUser()
                 dismiss()
             } catch let error as NSError {
                 alertManager.show(

@@ -172,35 +172,32 @@ struct PasswordSettingView: View {
     var body: some View {
         Form {
             SecureFieldWithAlert(
-                title: "Password",
-                placeholder: "Current Password",
+                placeholder: "Password",
                 text: $passwordUpdateRequest.oldPassword,
-                showAlert: $isShowingPasswordAlert,
-                alertMessage: "The password you entered is incorrect."
+                isShowingAlert: $isShowingPasswordAlert,
+                alertText: "The password you entered is incorrect."
             )
             .focused($focusedFieldNumber, equals: 0)
             .onSubmit {
                 focusedFieldNumber = 1
             }
             
-            Section() {
+            Section("New password") {
                 SecureFieldWithAlert(
-                    title: "New Password",
-                    placeholder: "Required",
+                    placeholder: "New password",
                     text: $passwordUpdateRequest.newPassword,
-                    showAlert: $isShowingNewPasswordAlert,
-                    alertMessage: "4 or more characters."
+                    isShowingAlert: $isShowingNewPasswordAlert,
+                    alertText: "4 or more characters."
                 )
                 .focused($focusedFieldNumber, equals: 1)
                 .onSubmit {
                     focusedFieldNumber = 2
                 }
                 SecureFieldWithAlert(
-                    title: "Verify",
-                    placeholder: "Confirm New Password",
+                    placeholder: "Retype Password",
                     text: $verifyNewPassword,
-                    showAlert: $isShowingVerifyNewPasswordAlert,
-                    alertMessage: "The passwords you entered do not match."
+                    isShowingAlert: $isShowingVerifyNewPasswordAlert,
+                    alertText: "The passwords you entered do not match."
                 )
                 .focused($focusedFieldNumber, equals: 2)
                 .onSubmit {

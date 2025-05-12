@@ -12,7 +12,7 @@ struct Response: Codable {
     let message: String
 }
 
-struct Label: Decodable {
+struct Value: Decodable {
     var value: String
 }
 
@@ -144,27 +144,21 @@ struct Report: Identifiable, Decodable {
     var id: Int
     var date: Date
     var userId: Int
-    var username: String
     var workId: Int
-    var workName: String
     var operationId: Int
-    var operationName: String
     var kindId: Int
-    var kindName: String
     var featureId: Int?
-    var featureName: String?
     var value: Double?
-    var unit: String?
     var note: String?
     
     private enum CodingKeys: String, CodingKey {
         case id, date
-        case userId = "user_id", username
-        case workId = "work_id", workName = "work_name"
-        case operationId = "operation_id", operationName = "operation_name"
-        case kindId = "kind_id", kindName = "kind_name"
-        case featureId = "feature_id", featureName = "feature_name"
-        case value, unit, note
+        case userId = "user_id"
+        case workId = "work_id"
+        case operationId = "operation_id"
+        case kindId = "kind_id"
+        case featureId = "feature_id"
+        case value, note
     }
 }
 
@@ -178,8 +172,6 @@ var dateFormatter: DateFormatter {
     formatter.timeStyle = .short
     return formatter
 }
-
-
 
 extension Role {
     func toResourcePermissions(

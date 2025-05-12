@@ -109,7 +109,7 @@ struct ReportPostView: View {
             kindId: work.id == 1 ? materialId : tankId,
             featureId: feature?.id,
             value: value,
-            note: note.isEmpty ? nil : note
+            note: note
         )
         do {
             try await NetworkService.createReport(systemId: systemId, newReportRequest: newReportRequest)

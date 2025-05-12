@@ -137,35 +137,38 @@ struct SensorCreateView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextFieldWithAlert(
-                    title: "Sensor Name",
-                    placeholder: "Required",
-                    text: $name,
-                    showAlert: $isAlertingName,
-                    alertMessage: "This field is required."
-                )
-                TextFieldWithAlert(
-                    title: "Unit",
-                    placeholder: "Required",
-                    text: $unit,
-                    showAlert: .constant(false),
-                    alertMessage: "4 or more characters."
-                )
-                Picker(selection: $tankId) {
-                    Text("None").tag(nil as Int?)
-                    ForEach(tanks) { tank in
-                        Text(tank.name).tag(tank.id)
-                    }
-                } label: {
-                    Text("Tank")
+                Section("Sensor") {
+                    TextFieldWithAlert(
+                        placeholder: "Name",
+                        text: $name,
+                        isShowingAlert: $isAlertingName,
+                        alertText: "This field is required."
+                    )
+                    TextFieldWithAlert(
+                        placeholder: "Unit",
+                        text: $unit,
+                        isShowingAlert: .constant(false),
+                        alertText: "4 or more characters."
+                    )
                 }
-                TextFieldWithAlert(
-                    title: "Position",
-                    placeholder: "Required",
-                    text: $position,
-                    showAlert: .constant(false),
-                    alertMessage: "4 or more characters."
-                )
+                
+                Section("Position") {
+                    Picker(selection: $tankId) {
+                        Text("None").tag(nil as Int?)
+                        ForEach(tanks) { tank in
+                            Text(tank.name).tag(tank.id)
+                        }
+                    } label: {
+                        Text("Tank")
+                    }
+                    TextFieldWithAlert(
+                        placeholder: "Position",
+                        text: $position,
+                        isShowingAlert: .constant(false),
+                        alertText: "4 or more characters."
+                    )
+                }
+                
                 DatePicker("Date", selection: $date, displayedComponents: .date)
                 
             }

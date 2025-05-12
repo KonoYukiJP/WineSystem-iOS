@@ -111,20 +111,18 @@ struct MaterialCreateView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextFieldWithAlert(
-                    title: "Material Name",
-                    placeholder: "Required",
-                    text: $name,
-                    showAlert: $isAlertingMaterialName,
-                    alertMessage: "This field is required."
-                )
-                TextFieldWithAlert(
-                    title: "Note",
-                    placeholder: "Required",
-                    text: $note,
-                    showAlert: .constant(false),
-                    alertMessage: "4 or more characters."
-                )
+                Section("Material") {
+                    TextFieldWithAlert(
+                        placeholder: "Name",
+                        text: $name,
+                        isShowingAlert: $isAlertingMaterialName,
+                        alertText: "This field is required."
+                    )
+                }
+                Section(header: Text("Note")) {
+                    TextEditor(text: $note)
+                        .frame(minHeight: 64)
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

@@ -91,6 +91,7 @@ struct LoginView: View {
                     }
                 }
             }
+            .navigationTitle("Wine System")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(action: {

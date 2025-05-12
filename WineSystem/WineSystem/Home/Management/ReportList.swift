@@ -10,11 +10,23 @@ import SwiftUI
 struct ReportList: View {
     @AppStorage("systemId") private var systemId: Int = 0
     @State private var reports: [Report] = []
+    @State private var users: [Item] = []
+    @State private var works: [Work] = []
+    @State private var operations: [Operation] = []
+    @State private var features: [Feature] = []
+    @State private var materials: [Item] = []
+    @State private var tanks: [Item] = []
     @State private var alertManager = AlertManager()
     
     private func getReports() async {
         do {
             reports = try await NetworkService.getReports(systemId: systemId)
+            users = try await NetworkService.getUsersAsItems(systemId: systemId)
+            works = try await NetworkService.getWorks()
+            operations = try await NetworkService.getOperations()
+            features = try await NetworkService.getFeatures()
+            materials = try await NetworkService.getMaterialsAsItems(systemId: systemId)
+            tanks = try await NetworkService.getTanksAsItems(systemId: systemId)
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: error.localizedDescription)
         }
@@ -25,45 +37,24 @@ struct ReportList: View {
                 NavigationLink(
                     destination: ReportEditView(
                         systemId: systemId,
-                        report: report
+                        report: report,
+                        users: users,
+                        works: works,
+                        operations: operations,
+                        features: features,
+                        materials: materials,
+                        tanks: tanks
                     ),
                     label: {
-                        VStack(alignment: .leading) {
-                            HStack {
-                                Text("\(report.date, formatter: dateFormatter)")
-                                Text(report.username)
-                            }
-                            HStack {
-                                Text("Work")
-                                Text(report.workName)
-                            }
-                            HStack {
-                                Text("Operation")
-                                Text(report.operationName)
-                            }
-                            HStack {
-                                Text("Kind")
-                                Text(report.kindName)
-                            }
-                            HStack {
-                                if let feature = report.featureName {
-                                    Text(feature)
-                                }
-                                if let value = report.value {
-                                    Text("\(value)")
-                                }
-                                if let unit = report.unit {
-                                    Text(unit)
-                                }
-                            }
-                            
-                            if let note = report.note {
-                                HStack {
-                                    Text("Note")
-                                    Text(note)
-                                }
-                            }
-                        }
+                        RoleListCell(
+                            report: report,
+                            users: users,
+                            works: works,
+                            operations: operations,
+                            features: features,
+                            materials: materials,
+                            tanks: tanks
+                        )
                     }
                 )
             }
@@ -75,133 +66,149 @@ struct ReportList: View {
     }
 }
 
+struct RoleListCell: View {
+    let report: Report
+    let users: [Item]
+    let works: [Work]
+    let operations: [Operation]
+    let features: [Feature]
+    let materials: [Item]
+    let tanks: [Item]
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            HStack {
+                Text("\(report.date, formatter: dateFormatter)")
+                Text(users.first(where: { $0.id == report.userId})?.name ?? "?")
+            }
+            HStack {
+                Text("Work")
+                Text(works.first(where: { $0.id == report.workId})?.name ?? "?")
+            }
+            HStack {
+                Text("Operation")
+                Text(operations.first(where: { $0.id == report.operationId})?.name ?? "?")
+            }
+            HStack {
+                Text(report.workId == 1 ? "Material" : "Tank")
+                Text(report.workId == 1
+                     ? materials.first(where: { $0.id == report.kindId})?.name ?? "?"
+                     : tanks.first(where: { $0.id == report.kindId})?.name ?? "?"
+                )
+            }
+            HStack {
+                if let featureId = report.featureId, let value = report.value {
+                    Text(features.first(where: { $0.id == featureId})?.name ?? "?")
+                    Text("\(value)")
+                    Text(features.first(where: { $0.id == featureId})?.unit ?? "?")
+                }
+            }
+            if let note = report.note {
+                HStack {
+                    Text("Note")
+                    Text(note)
+                }
+            }
+        }
+    }
+}
+
 struct ReportEditView: View {
     let systemId: Int
     let report: Report
-    @State var date: Date
-    @State var user: Item
-    @State var work: Work
-    @State var operation: Item
-    @State var kind: Item
-    @State var feature: Item
-    @State var value: Double?
-    @State var note: String
+    @State var newReportRequest: NewReportRequest
+    let users: [Item]
+    let works: [Work]
+    let operations: [Operation]
+    let features: [Feature]
+    let materials: [Item]
+    let tanks: [Item]
+    
     @State private var alertManager = AlertManager()
     
-    init(systemId: Int, report: Report) {
+    init(systemId: Int, report: Report, users: [Item], works: [Work], operations: [Operation], features: [Feature], materials: [Item], tanks: [Item]) {
         self.systemId = systemId
         self.report = report
-        _date = State(initialValue: report.date)
-        _user = State(
-            initialValue: Item(id: report.userId, name: report.username)
-        )
-        _work = State(
-            initialValue: Work(id: report.workId, name: report.workName)
-        )
-        _operation = State(
-            initialValue: Item(id: report.operationId, name: report.operationName)
-        )
-        _kind = State(
-            initialValue: Item(id: report.kindId, name: report.kindName)
-        )
-        _feature = State(
-            initialValue: Item(id: report.featureId ?? 0, name: report.featureName ?? "")
-        )
-        _value = State(initialValue: report.value)
-        _note = State(initialValue: report.note ?? "")
+        _newReportRequest = State(initialValue: .init(from: report))
+        self.users = users
+        self.works = works
+        self.operations = operations
+        self.features = features
+        self.materials = materials
+        self.tanks = tanks
     }
     
     var body: some View {
         List {
-            NavigationLink(destination: DateEditView(date: $date)) {
+            NavigationLink(destination: DateEditView(date: $newReportRequest.date)) {
                 HStack {
                     Text("Date")
                     Spacer()
-                    Text(date, formatter: dateFormatter)
+                    Text(newReportRequest.date, formatter: dateFormatter)
                 }
             }
-            NavigationLink(destination: UserPicker(
-                systemId: systemId,
-                user: $user
-            )) {
-                HStack {
-                    Text("Username")
-                    Spacer()
-                    Text(user.name)
+            Picker("User", selection: $newReportRequest.userId) {
+                ForEach(users) { user in
+                    Text(user.name).tag(user.id)
                 }
             }
-            NavigationLink(destination: WorkPicker(work: $work)) {
-                HStack {
-                    Text("Work")
-                    Spacer()
-                    Text(work.name)
+            Picker("Work", selection: $newReportRequest.workId) {
+                ForEach(works) { work in
+                    Text(work.name).tag(work.id)
                 }
             }
-            NavigationLink(destination: OperationPicker(
-                workId: work.id,
-                operation: $operation
-            )) {
-                HStack {
-                    Text("Operation")
-                    Spacer()
-                    Text(operation.name)
+            Picker("Operation", selection: $newReportRequest.operationId) {
+                ForEach(operations.filter { $0.workId == newReportRequest.workId}) { operation in
+                    Text(operation.name).tag(operation.id)
                 }
             }
-            NavigationLink(destination: KindPicker(
-                systemId: systemId,
-                workId: work.id,
-                kind: $kind
-            )) {
-                HStack {
-                    Text("Kind")
-                    Spacer()
-                    Text(kind.name)
-                }
-            }
-            if [4, 13, 17].contains(where: { $0 == operation.id }) {
-                NavigationLink(destination: FeaturePicker(feature: $feature)) {
-                    HStack {
-                        Text("Feature")
-                        Spacer()
-                        Text(feature.name)
+            if newReportRequest.workId == 1 {
+                Picker("Material", selection: $newReportRequest.kindId) {
+                    ForEach(materials) { material in
+                        Text(material.name).tag(material.id)
                     }
                 }
-                NavigationLink(destination: ValueEditView(value: $value)) {
+            } else {
+                Picker("Tank", selection: $newReportRequest.kindId) {
+                    ForEach(tanks) { tank in
+                        Text(tank.name).tag(tank.id)
+                    }
+                }
+            }
+            if [4, 13, 17].contains(where: { $0 == newReportRequest.operationId }) {
+                Picker("Feature", selection: $newReportRequest.featureId) {
+                    ForEach(features) { feature in
+                        Text(feature.name).tag(feature.id)
+                    }
+                }
+                NavigationLink(destination: ValueEditView(value: $newReportRequest.value)) {
                     HStack {
                         Text("Value")
                         Spacer()
-                        Text(value.map { String($0) } ?? "None")
+                        Text(newReportRequest.value.map { String($0) } ?? "None")
                     }
                 }
             }
             
             NavigationLink(destination: NoteEditView(
                 titleKey: "Note",
-                text: $note
+                text: $newReportRequest.note
             )) {
                 HStack {
                     Text("Note")
                     Spacer()
-                    Text(note)
+                    Text(newReportRequest.note)
                 }
             }
         }
+        .pickerStyle(.navigationLink)
         .navigationTitle("Report Detail")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") {
                     Task {
                         do {
-                            try await NetworkService.updateReport(reportId: report.id, newReportRequest: NewReportRequest(
-                                date: date,
-                                userId: user.id,
-                                workId: work.id,
-                                operationId: operation.id,
-                                kindId: kind.id,
-                                featureId: feature.id,
-                                value: value,
-                                note: note
-                            ))
+                            try await NetworkService.updateReport(reportId: report.id, newReportRequest: newReportRequest)
                         } catch {
                             alertManager.show(title: "Error", message: error.localizedDescription)
                         }
@@ -225,180 +232,12 @@ struct DateEditView: View {
     }
 }
 
-struct UserPicker: View {
-    @Environment(\.dismiss) private var dismiss
-    let systemId: Int
-    @Binding var user: Item
-    @State private var users: [Item] = []
-    @State private var alertManager = AlertManager()
-    
-    var body: some View {
-        Form {
-            Picker("User", selection: $user) {
-                ForEach(users) { user in
-                    Text(user.name).tag(user)
-                }
-            }
-            .pickerStyle(.inline)
-            .onChange(of: user) {
-                dismiss()
-            }
-        }
-        .alert(manager: alertManager)
-        .task {
-            do {
-                users = try await NetworkService.getUsersAsItems(systemId: systemId)
-            } catch {
-                alertManager.show(title: "Error", message: error.localizedDescription)
-            }
-        }
-    }
-}
-
-struct WorkPicker: View {
-    @Environment(\.dismiss) private var dismiss
-    @Binding var work: Work
-    @State private var works: [Work] = []
-    @State private var alertManager = AlertManager()
-    
-    var body: some View {
-        Form {
-            Picker("Work", selection: $work) {
-                ForEach(works) { work in
-                    Text(work.name).tag(work)
-                }
-            }
-            .pickerStyle(.inline)
-            .onChange(of: work) {
-                dismiss()
-            }
-        }
-        .alert(manager: alertManager)
-        .task {
-            do {
-                works = try await NetworkService.getWorks()
-            } catch {
-                alertManager.show(title: "Error", message: error.localizedDescription)
-            }
-        }
-    }
-}
-
-struct OperationPicker: View {
-    @Environment(\.dismiss) private var dismiss
-    let workId: Int
-    @Binding var operation: Item
-    @State private var operations: [Item] = []
-    @State private var alertManager = AlertManager()
-    
-    var body: some View {
-        Form {
-            Picker("Operation", selection: $operation) {
-                ForEach(operations) { operation in
-                    Text(operation.name).tag(operation)
-                }
-            }
-            .pickerStyle(.inline)
-            .onChange(of: operation) {
-                dismiss()
-            }
-        }
-        .alert(manager: alertManager)
-        .task {
-            do {
-                operations = try await NetworkService.getOperationsAsItems(workId: workId)
-            } catch {
-                alertManager.show(title: "Error", message: error.localizedDescription)
-            }
-        }
-    }
-}
-
-struct KindPicker: View {
-    @Environment(\.dismiss) private var dismiss
-    let systemId: Int
-    let workId: Int
-    @Binding var kind: Item
-    @State private var materials: [Item] = []
-    @State private var tanks: [Item] = []
-    @State private var alertManager = AlertManager()
-    
-    var body: some View {
-        Form {
-            if workId == 1 {
-                Picker("Kind", selection: $kind) {
-                    ForEach(materials) { material in
-                        Text(material.name).tag(material)
-                    }
-                }
-                .pickerStyle(.inline)
-                .onChange(of: kind) {
-                    dismiss()
-                }
-            } else {
-                Picker("Kind", selection: $kind) {
-                    ForEach(tanks) { tank in
-                        Text(tank.name).tag(tank)
-                    }
-                }
-                .pickerStyle(.inline)
-                .onChange(of: kind) {
-                    dismiss()
-                }
-            }
-        }
-        .alert(manager: alertManager)
-        .task {
-            do {
-                if workId == 1 {
-                    materials = try await NetworkService.getMaterialsAsItems(systemId: systemId)
-                } else {
-                    tanks = try await NetworkService.getTanksAsItems(systemId: systemId)
-                }
-            } catch {
-                alertManager.show(title: "Error", message: error.localizedDescription)
-            }
-        }
-    }
-}
-
-struct FeaturePicker: View {
-    @Environment(\.dismiss) private var dismiss
-    @Binding var feature: Item
-    @State private var features: [Item] = []
-    @State private var alertManager = AlertManager()
-    
-    var body: some View {
-        Form {
-            Picker("Feature", selection: $feature) {
-                ForEach(features) { feature in
-                    Text(feature.name).tag(feature)
-                }
-            }
-            .pickerStyle(.inline)
-            .onChange(of: feature) {
-                dismiss()
-            }
-        }
-        .task {
-            do {
-                features = try await NetworkService.getFeaturesAsItems()
-            } catch {
-                alertManager.show(title: "Error", message: error.localizedDescription)
-            }
-        }
-    }
-}
-
 struct ValueEditView: View {
-    
     @Binding var value: Double?
-    
     
     var body: some View {
         Form {
             TextField("Value", value: $value, format: .number)
-                .multilineTextAlignment(.trailing)
         }
     }
 }

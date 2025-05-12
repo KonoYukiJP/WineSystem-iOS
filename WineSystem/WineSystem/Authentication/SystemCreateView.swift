@@ -60,15 +60,14 @@ struct SystemCreateView: View {
         NavigationStack {
             Form {
                 TextFieldWithAlert(
-                    title: "System Name",
-                    placeholder: "System Name",
+                    placeholder: "Name",
                     text: $systemCreateRequest.name,
-                    showAlert: $isAlertingEmptySystemName,
-                    alertMessage: "This field is required."
+                    isShowingAlert: $isAlertingEmptySystemName,
+                    alertText: "This field is required."
                 )
                 HStack {
                     Text("Year")
-                        .frame(width: 136, alignment: .leading)
+                    Spacer()
                     Button(action: {
                         isShowingPicker.toggle()
                     }, label: {
@@ -86,28 +85,30 @@ struct SystemCreateView: View {
                         .pickerStyle(.wheel)
                     }
                 }
-                TextFieldWithAlert(
-                    title: "Owner Name",
-                    placeholder: "Owner Name",
-                    text: $systemCreateRequest.ownerName,
-                    showAlert: $isAlertingEmptyAdminName,
-                    alertMessage: "This field is required."
-                )
-                SecureFieldWithAlert(
-                    title: "Password",
-                    placeholder: "Password",
-                    text: $systemCreateRequest.password,
-                    showAlert: $isAlertingShortPassword,
-                    alertMessage: "4 or more characters."
-                )
-                SecureFieldWithAlert(
-                    title: "Confirm",
-                    placeholder: "Confirm password",
-                    text: $confirmation,
-                    showAlert: $isAlertingWrongPassword,
-                    alertMessage: "The passwords you entered do not match."
-                )
+                Section("Owner Name") {
+                    TextFieldWithAlert(
+                        placeholder: "Owner Name",
+                        text: $systemCreateRequest.ownerName,
+                        isShowingAlert: $isAlertingEmptyAdminName,
+                        alertText: "This field is required."
+                    )
+                }
+                Section("Password") {
+                    SecureFieldWithAlert(
+                        placeholder: "Password",
+                        text: $systemCreateRequest.password,
+                        isShowingAlert: $isAlertingShortPassword,
+                        alertText: "4 or more characters."
+                    )
+                    SecureFieldWithAlert(
+                        placeholder: "Confirm password",
+                        text: $confirmation,
+                        isShowingAlert: $isAlertingWrongPassword,
+                        alertText: "The passwords you entered do not match."
+                    )
+                }
             }
+            .navigationTitle("System")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(action: {

@@ -237,13 +237,14 @@ struct RoleCreateView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextFieldWithAlert(
-                    title: "Role Name",
-                    placeholder: "Required",
-                    text: $name,
-                    showAlert: $isAlertingRoleName,
-                    alertMessage: "This field is required."
-                )
+                Section("Role") {
+                    TextFieldWithAlert(
+                        placeholder: "Name",
+                        text: $name,
+                        isShowingAlert: $isAlertingRoleName,
+                        alertText: "This field is required."
+                    )
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

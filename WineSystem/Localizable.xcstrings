@@ -273,9 +273,6 @@
         }
       }
     },
-    "Key" : {
-      "extractionState" : "manual"
-    },
     "Kind" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -354,6 +351,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "名前"
+          }
+        }
+      }
+    },
+    "New password" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新しいパスワード"
           }
         }
       }
@@ -489,6 +497,17 @@
     },
     "Restore" : {
 
+    },
+    "Retype Password" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パスワードの再入力"
+          }
+        }
+      }
     },
     "Role" : {
       "extractionState" : "manual",
@@ -761,6 +780,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "確認する"
+          }
+        }
+      }
+    },
+    "Wine System" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ワインシステム"
           }
         }
       }

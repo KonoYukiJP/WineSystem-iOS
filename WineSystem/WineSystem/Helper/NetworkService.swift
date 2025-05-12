@@ -31,8 +31,8 @@ struct NetworkService {
         return try await get(path: "/systems/\(systemId)/users")
     }
     static func getUsername(userId: Int) async throws -> String {
-        let label: Label = try await get(path: "/users/\(userId)/name")
-        return label.value
+        let value: Value = try await get(path: "/users/\(userId)/name")
+        return value.value
     }
     static func getRoles(systemId: Int) async throws -> [Role] {
         return try await get(path: "/systems/\(systemId)/roles")
@@ -63,9 +63,6 @@ struct NetworkService {
     }
     static func getReports(systemId: Int) async throws -> [Report] {
         return try await get(path: "/systems/\(systemId)/reports")
-    }
-    static func getOperationsAsItems(workId: Int) async throws -> [Item] {
-        return try await get(path: "/works/\(workId)/operations")
     }
     static func getUsersAsItems(systemId: Int) async throws -> [Item] {
         return try await get(path: "/systems/\(systemId)/users")

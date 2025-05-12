@@ -22,10 +22,10 @@ struct SystemCreateRequest: Encodable {
     }
 }
 struct UserCreateRequest: Encodable {
-    let name: String
-    let password: String
-    let roleId: Int
-    let isEnabled: Bool
+    var name: String
+    var password: String
+    var roleId: Int
+    var isEnabled: Bool
     private enum CodingKeys: String, CodingKey {
         case name, password, roleId = "role_id", isEnabled = "is_enabled"
     }
@@ -63,7 +63,7 @@ struct NewReportRequest: Encodable {
     var kindId: Int
     var featureId: Int?
     var value: Double?
-    var note: String?
+    var note: String
     private enum CodingKeys: String, CodingKey {
         case date, userId = "user_id"
         case workId = "work_id"
@@ -123,12 +123,21 @@ extension LoginRequest {
         password = ""
     }
 }
+
 extension SystemCreateRequest {
     init() {
         name = ""
         year = Calendar.current.component(.year, from: Date())
         ownerName = ""
         password = ""
+    }
+}
+extension UserCreateRequest {
+    init() {
+        name = ""
+        password = ""
+        roleId = 0
+        isEnabled = true
     }
 }
 extension SystemNameUpdateRequest {
@@ -179,7 +188,6 @@ extension NewSensorRequest {
         self.tankId = sensor.tankId
         self.position = sensor.position
         self.date = sensor.date
-        
     }
 }
 extension NewTankRequest {
@@ -187,5 +195,17 @@ extension NewTankRequest {
         self.name = tank.name
         self.materialId = tank.materialId
         self.note = tank.note
+    }
+}
+extension NewReportRequest {
+    init(from report: Report) {
+        self.date = report.date
+        self.userId = report.userId
+        self.workId = report.workId
+        self.operationId = report.operationId
+        self.kindId = report.kindId
+        self.featureId = report.featureId
+        self.value = report.value
+        self.note = report.note ?? ""
     }
 }

@@ -127,27 +127,26 @@ private struct TankCreateView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextFieldWithAlert(
-                    title: "Tank Name",
-                    placeholder: "Required",
-                    text: $name,
-                    showAlert: $isAlertingName,
-                    alertMessage: "This field is required."
-                )
-                TextFieldWithAlert(
-                    title: "Note",
-                    placeholder: "Required",
-                    text: $note,
-                    showAlert: .constant(false),
-                    alertMessage: "4 or more characters."
-                )
-                Picker(selection: $materialId) {
-                    Text("None").tag(nil as Int?)
-                    ForEach(materials) { material in
-                        Text(material.name).tag(material.id)
+                Section("Tank") {
+                    TextFieldWithAlert(
+                        placeholder: "Name",
+                        text: $name,
+                        isShowingAlert: $isAlertingName,
+                        alertText: "This field is required."
+                    )
+                    Picker(selection: $materialId) {
+                        Text("None").tag(nil as Int?)
+                        ForEach(materials) { material in
+                            Text(material.name).tag(material.id)
+                        }
+                    } label: {
+                        Text("Material")
                     }
-                } label: {
-                    Text("Material")
+                }
+                
+                Section(header: Text("Note")) {
+                    TextEditor(text: $note)
+                        .frame(minHeight: 64)
                 }
             }
             .toolbar {
