@@ -19,7 +19,7 @@ struct ReportView: View {
     var body: some View {
         NavigationStack {
             GeometryReader { geometry in
-                let columnCount = geometry.size.width < 600 ? 2 : 4
+                let columnCount = Int(geometry.size.width / 144)
                 
                 LazyVGrid(columns: Array(repeating: GridItem(.fixed(144)), count: columnCount), spacing: 0) {
                     ForEach(works) { work in

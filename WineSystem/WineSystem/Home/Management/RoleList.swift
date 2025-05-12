@@ -219,6 +219,7 @@ struct RoleCreateView: View {
     @State private var name = ""
     @State private var isAlertingRoleName = false
     @State private var alertManager = AlertManager()
+    @FocusState private var focusedFieldNumber: Int?
     
     private func createRole() async {
         if name.isEmpty {
@@ -244,6 +245,7 @@ struct RoleCreateView: View {
                         isShowingAlert: $isAlertingRoleName,
                         alertText: "This field is required."
                     )
+                    .focused($focusedFieldNumber, equals: 0)
                 }
             }
             .toolbar {
@@ -261,6 +263,7 @@ struct RoleCreateView: View {
                 }
             }
             .alert(manager: alertManager)
+            .onAppear { focusedFieldNumber = 0 }
         }
     }
 }

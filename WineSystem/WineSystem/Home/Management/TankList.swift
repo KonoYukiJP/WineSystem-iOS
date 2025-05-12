@@ -101,9 +101,9 @@ private struct TankCreateView: View {
     @State private var name = ""
     @State private var note = ""
     @State private var materialId: Int? = nil
-    
     @State private var isAlertingName = false
     @State private var alertManager = AlertManager()
+    @FocusState private var focusedFieldNumber: Int?
     
     private func createTank() async {
         if name.isEmpty {
@@ -134,6 +134,7 @@ private struct TankCreateView: View {
                         isShowingAlert: $isAlertingName,
                         alertText: "This field is required."
                     )
+                    .focused($focusedFieldNumber, equals: 0)
                     Picker(selection: $materialId) {
                         Text("None").tag(nil as Int?)
                         ForEach(materials) { material in
@@ -164,6 +165,7 @@ private struct TankCreateView: View {
                 }
             }
             .alert(manager: alertManager)
+            .onAppear { focusedFieldNumber = 0 }
         }
     }
 }

@@ -171,15 +171,17 @@ struct PasswordSettingView: View {
     
     var body: some View {
         Form {
-            SecureFieldWithAlert(
-                placeholder: "Password",
-                text: $passwordUpdateRequest.oldPassword,
-                isShowingAlert: $isShowingPasswordAlert,
-                alertText: "The password you entered is incorrect."
-            )
-            .focused($focusedFieldNumber, equals: 0)
-            .onSubmit {
-                focusedFieldNumber = 1
+            Section("Password") {
+                SecureFieldWithAlert(
+                    placeholder: "Password",
+                    text: $passwordUpdateRequest.oldPassword,
+                    isShowingAlert: $isShowingPasswordAlert,
+                    alertText: "The password you entered is incorrect."
+                )
+                .focused($focusedFieldNumber, equals: 0)
+                .onSubmit {
+                    focusedFieldNumber = 1
+                }
             }
             
             Section("New password") {

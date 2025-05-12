@@ -123,7 +123,6 @@ struct ReportEditView: View {
     let features: [Feature]
     let materials: [Item]
     let tanks: [Item]
-    
     @State private var alertManager = AlertManager()
     
     init(systemId: Int, report: Report, users: [Item], works: [Work], operations: [Operation], features: [Feature], materials: [Item], tanks: [Item]) {
@@ -191,7 +190,6 @@ struct ReportEditView: View {
             }
             
             NavigationLink(destination: NoteEditView(
-                titleKey: "Note",
                 text: $newReportRequest.note
             )) {
                 HStack {
@@ -233,18 +231,34 @@ struct DateEditView: View {
 }
 
 struct ValueEditView: View {
+    @Environment(\.dismiss) private var dismiss
     @Binding var value: Double?
+    @FocusState private var isFocused: Bool
     
     var body: some View {
         Form {
             TextField("Value", value: $value, format: .number)
+                .focused($isFocused)
+                .onSubmit {
+                    dismiss()
+                }
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Done") {
+                    dismiss()
+                }
+            }
+        }
+        .navigationTitle("Value")
+        .onAppear {
+            isFocused = true
         }
     }
 }
 
 struct NoteEditView: View {
     @Environment(\.dismiss) private var dismiss
-    let titleKey: String
     @Binding var text: String
     @FocusState private var isFocused: Bool
     
@@ -253,11 +267,8 @@ struct NoteEditView: View {
             TextEditor(text: $text)
                 .frame(minHeight: 64)
                 .focused($isFocused)
-                .onSubmit {
-                    dismiss()
-                }
         }
-        .navigationTitle(titleKey)
+        .navigationTitle("Note")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Done") {

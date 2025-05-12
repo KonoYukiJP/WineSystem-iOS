@@ -83,6 +83,7 @@ struct MaterialCreateView: View {
     @State private var note = ""
     @State private var isAlertingMaterialName = false
     @State private var alertManager = AlertManager()
+    @FocusState private var focusedFieldNumber: Int?
     
     struct NewMaterial: Codable {
         let name: String
@@ -118,6 +119,7 @@ struct MaterialCreateView: View {
                         isShowingAlert: $isAlertingMaterialName,
                         alertText: "This field is required."
                     )
+                    .focused($focusedFieldNumber, equals: 0)
                 }
                 Section(header: Text("Note")) {
                     TextEditor(text: $note)
@@ -137,6 +139,7 @@ struct MaterialCreateView: View {
                 }
             }
             .alert(manager: alertManager)
+            .onAppear { focusedFieldNumber = 0 }
         }
     }
 }

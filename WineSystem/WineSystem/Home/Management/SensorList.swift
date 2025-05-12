@@ -111,6 +111,7 @@ struct SensorCreateView: View {
     @State private var position = ""
     @State private var date: Date = Date()
     @State private var alertManager = AlertManager()
+    @FocusState private var focusedFieldNumber: Int?
     
     private func createSensor() async {
         if name.isEmpty {
@@ -144,12 +145,15 @@ struct SensorCreateView: View {
                         isShowingAlert: $isAlertingName,
                         alertText: "This field is required."
                     )
+                    .focused($focusedFieldNumber, equals: 0)
+                    .onSubmit { focusedFieldNumber = 1 }
                     TextFieldWithAlert(
                         placeholder: "Unit",
                         text: $unit,
                         isShowingAlert: .constant(false),
                         alertText: "4 or more characters."
                     )
+                    .focused($focusedFieldNumber, equals: 1)
                 }
                 
                 Section("Position") {
@@ -187,6 +191,7 @@ struct SensorCreateView: View {
                 }
             }
             .alert(manager: alertManager)
+            .onAppear { focusedFieldNumber = 0 }
         }
     }
 }

@@ -84,6 +84,7 @@ struct UserCreateView: View {
     @State private var isAlertingShortPassword = false
     @State private var isAlertingWrongPassword = false
     @State private var alertManager = AlertManager()
+    @FocusState private var focusedFieldNumber: Int?
     
     private func validateRequest() -> Bool {
         var isValidRequest: Bool = true
@@ -123,20 +124,25 @@ struct UserCreateView: View {
                         isShowingAlert: $isAlertingEmptyUsername,
                         alertText: "This field is required."
                     )
+                    .focused($focusedFieldNumber, equals: 0)
+                    .onSubmit { focusedFieldNumber = 1 }
                 }
                 Section("Password") {
                     SecureFieldWithAlert(
-                        placeholder: "Required",
+                        placeholder: "Password",
                         text: $userCreateRequest.password,
                         isShowingAlert: $isAlertingShortPassword,
                         alertText: "4 or more characters."
                     )
+                    .focused($focusedFieldNumber, equals: 1)
+                    .onSubmit { focusedFieldNumber = 2 }
                     SecureFieldWithAlert(
                         placeholder: "Confirm password",
                         text: $confirmation,
                         isShowingAlert: $isAlertingWrongPassword,
                         alertText: "The passwords you entered do not match."
                     )
+                    .focused($focusedFieldNumber, equals: 2)
                 }
                 Picker(selection: $userCreateRequest.roleId) {
                     ForEach(roles) { role in
@@ -144,9 +150,6 @@ struct UserCreateView: View {
                     }
                 } label: {
                     Text("Role")
-                }
-                .onAppear {
-                    userCreateRequest.roleId = roles.first!.id
                 }
                 Toggle(
                     "Status",
@@ -172,6 +175,10 @@ struct UserCreateView: View {
                 }
             }
             .alert(manager: alertManager)
+            .onAppear {
+                userCreateRequest.roleId = roles.first!.id
+                focusedFieldNumber = 0
+            }
         }
     }
 }

@@ -194,9 +194,6 @@
         }
       }
     },
-    "Current Password" : {
-
-    },
     "Daily Report" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -486,6 +483,7 @@
       }
     },
     "Required" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
@@ -675,6 +673,7 @@
       }
     },
     "Tank Name" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
@@ -694,9 +693,6 @@
 
     },
     "This field is required." : {
-
-    },
-    "Title" : {
 
     },
     "Unit" : {
