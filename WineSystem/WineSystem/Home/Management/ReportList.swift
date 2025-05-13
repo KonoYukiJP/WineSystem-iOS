@@ -46,7 +46,7 @@ struct ReportList: View {
                         tanks: tanks
                     ),
                     label: {
-                        RoleListCell(
+                        ReportListCell(
                             report: report,
                             users: users,
                             works: works,
@@ -66,7 +66,7 @@ struct ReportList: View {
     }
 }
 
-struct RoleListCell: View {
+struct ReportListCell: View {
     let report: Report
     let users: [Item]
     let works: [Work]
@@ -83,18 +83,22 @@ struct RoleListCell: View {
             }
             HStack {
                 Text("Work")
-                Text(works.first(where: { $0.id == report.workId})?.name ?? "?")
+                Text(works.first(where: { $0.id == report.workId})?.localizedName ?? "?")
             }
             HStack {
                 Text("Operation")
-                Text(operations.first(where: { $0.id == report.operationId})?.name ?? "?")
+                Text(operations.first(where: { $0.id == report.operationId})?.localizedName ?? "?")
             }
             HStack {
-                Text(report.workId == 1 ? "Material" : "Tank")
-                Text(report.workId == 1
-                     ? materials.first(where: { $0.id == report.kindId})?.name ?? "?"
-                     : tanks.first(where: { $0.id == report.kindId})?.name ?? "?"
-                )
+                if let operation = operations.first(where: { $0.id == report.operationId }) {
+                    if operation.targetType == .material {
+                        Text("Material")
+                        Text(materials.first(where: { $0.id == report.kindId})?.name ?? "?")
+                    } else {
+                        Text("Tank")
+                        Text(tanks.first(where: { $0.id == report.kindId})?.name ?? "?")
+                    }
+                }
             }
             HStack {
                 if let featureId = report.featureId, let value = report.value {
@@ -157,8 +161,11 @@ struct ReportEditView: View {
                 }
             }
             Picker("Operation", selection: $newReportRequest.operationId) {
-                ForEach(operations.filter { $0.workId == newReportRequest.workId}) { operation in
-                    Text(operation.name).tag(operation.id)
+                ForEach(works.first(where: {$0.id == newReportRequest.workId})!.operationIds, id: \.self) { operationId in
+                    if let operation = operations.first(where: { $0.id == operationId }) {
+                        Text(operation.name)
+                            .tag(operation.id)
+                    }
                 }
             }
             if newReportRequest.workId == 1 {

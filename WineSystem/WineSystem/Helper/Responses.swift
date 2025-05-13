@@ -26,23 +26,19 @@ struct System: Identifiable, Decodable {
     var name: String
     var year: Int
 }
-
 struct User: Identifiable, Hashable, Decodable {
     var id: Int
     var name: String
     var roleId: Int
     var isEnabled: Bool
-
     private enum CodingKeys: String, CodingKey {
         case id, name, roleId = "role_id", isEnabled = "is_enabled"
     }
 }
-
-struct Permission: Identifiable, Codable, Hashable {
+struct Permission: Identifiable, Codable {
     var id: Int { resourceId }
     let resourceId: Int
     let actionIds: [Int]
-    
     private enum CodingKeys: String, CodingKey {
         case resourceId = "resource_id", actionIds = "action_ids"
     }
@@ -51,55 +47,44 @@ struct Role: Identifiable, Codable {
     let id: Int
     let name: String
     let permissions: [Permission]
-    
     private enum CodingKeys: String, CodingKey {
         case id, name, permissions
     }
 }
-
 struct ActionPermission: Identifiable {
     let id: Int
     var isPermitted: Bool
 }
 struct ResourcePermission: Identifiable {
     let id: Int
+    var isExpanded: Bool
     var actionPermissions: [ActionPermission]
 }
-
 struct Action: Identifiable, Decodable {
     var id: Int
     var name: String
-    var localizedActionName: LocalizedStringKey {
-        LocalizedStringKey(name)
-    }
+    var localizedName: LocalizedStringKey { LocalizedStringKey(name) }
 }
-
 struct Resource: Identifiable, Decodable {
     var id: Int
     var name: String
-    var localizedResourceName: LocalizedStringKey {
-        LocalizedStringKey(name)
-    }
+    var localizedName: LocalizedStringKey { LocalizedStringKey(name) }
 }
-
 
 struct Material: Identifiable, Decodable {
     var id: Int
     var name: String
     var note: String
 }
-
 struct Tank: Identifiable, Decodable {
     var id: Int
     var name: String
     var note: String
     var materialId: Int?
-    
     private enum CodingKeys: String, CodingKey {
         case id, name, note, materialId = "material_id"
     }
 }
-
 struct Sensor: Identifiable, Decodable {
     var id: Int
     var name: String
@@ -107,7 +92,6 @@ struct Sensor: Identifiable, Decodable {
     var tankId: Int?
     var position: String
     var date: Date
-    
     private enum CodingKeys: String, CodingKey {
         case id, name, unit, tankId = "tank_id", position, date
     }
@@ -116,30 +100,32 @@ struct Sensor: Identifiable, Decodable {
 struct Work: Identifiable, Hashable, Decodable {
     var id: Int
     var name: String
-    var localizedWorkName: LocalizedStringKey {
-        LocalizedStringKey(name)
-    }
-}
-
-struct Operation: Identifiable, Hashable, Decodable {
-    var id: Int
-    var name: String
-    var workId: Int
-    
-    var localizedOperationName: LocalizedStringKey {
-        LocalizedStringKey(name)
-    }
+    var operationIds: [Int]
+    var localizedName: LocalizedStringKey { LocalizedStringKey(name) }
     private enum CodingKeys: String, CodingKey {
-        case id, name, workId = "work_id"
+        case id, name, operationIds = "operation_ids"
     }
 }
-
+enum TargetType: String, Decodable {
+    case tank
+    case material
+    case features
+}
+struct Operation: Identifiable, Hashable, Decodable {
+    let id: Int
+    let name: String
+    let targetType: TargetType
+    let featureIds: [Int]
+    var localizedName: LocalizedStringKey { LocalizedStringKey(name) }
+    private enum CodingKeys: String, CodingKey {
+        case id, name, targetType = "target_type", featureIds = "feature_ids"
+    }
+}
 struct Feature: Identifiable, Decodable {
     var id: Int
     var name: String
     var unit: String
 }
-
 struct Report: Identifiable, Decodable {
     var id: Int
     var date: Date
@@ -175,28 +161,30 @@ var dateFormatter: DateFormatter {
 
 extension Role {
     func toResourcePermissions(
-            resources: [Resource],
-            actions: [Action]
-        ) -> [ResourcePermission] {
-            return resources.map { resource in
-                let permittedActionIds = permissions
-                    .first(where: { $0.resourceId == resource.id })?
-                    .actionIds ?? []
+        resources: [Resource],
+        actions: [Action]
+    ) -> [ResourcePermission] {
+        return resources.map { resource in
+            let permittedActionIds = permissions
+                .first(where: { $0.resourceId == resource.id })?
+                .actionIds ?? []
 
-                let actionPermissions = actions.map { action in
-                    ActionPermission(
-                        id: action.id,
-                        isPermitted: permittedActionIds.contains(action.id)
-                    )
-                }
-
-                return ResourcePermission(
-                    id: resource.id,
-                    actionPermissions: actionPermissions
+            let actionPermissions = actions.map { action in
+                ActionPermission(
+                    id: action.id,
+                    isPermitted: permittedActionIds.contains(action.id)
                 )
             }
+
+            return ResourcePermission(
+                id: resource.id,
+                isExpanded: false,
+                actionPermissions: actionPermissions
+            )
         }
+    }
 }
+
 extension Array where Element == ResourcePermission {
     func toPermissions() -> [Permission] {
         self.compactMap { resource in

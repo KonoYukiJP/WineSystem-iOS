@@ -23,18 +23,20 @@ struct FeaturesView: View {
     
     var body: some View {
         List {
-            ForEach(features) { feature in
-                NavigationLink(
-                    destination:
-                        ReportPostView(
-                            work: work,
-                            operation: operation,
-                            feature: feature
-                        ),
-                    label: {
-                        Text(feature.name)
-                    }
-                )
+            ForEach(operation.featureIds, id: \.self) { featureId in
+                if let feature = features.first(where: { $0.id == featureId }) {
+                    NavigationLink(
+                        destination:
+                            ReportPostView(
+                                work: work,
+                                operation: operation,
+                                feature: feature
+                            ),
+                        label: {
+                            Text(feature.name)
+                        }
+                    )
+                }
             }
         }
         .task {
@@ -45,6 +47,6 @@ struct FeaturesView: View {
 
 #Preview {
     NavigationStack {
-        FeaturesView(work: Work(id: 0, name: "Work"), operation: Operation(id: 0, name: "Operation", workId: 0))
+        FeaturesView(work: Work(id: 0, name: "Work", operationIds: [0]), operation: Operation(id: 0, name: "Operation", targetType: .tank, featureIds: [1, 2]))
     }.ja()
 }

@@ -15,18 +15,11 @@
         }
       }
     },
-    "%@" : {
+    "?" : {
 
     },
-    "%@-%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@-%2$@"
-          }
-        }
-      }
+    "%@" : {
+
     },
     "%lf" : {
 
@@ -36,6 +29,50 @@
     },
     "4 or more characters." : {
 
+    },
+    "Adding Mash" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もろみ投入"
+          }
+        }
+      }
+    },
+    "Additives added" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加物投入"
+          }
+        }
+      }
+    },
+    "Adjustment" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "調整"
+          }
+        }
+      }
+    },
+    "Aging" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "熟成"
+          }
+        }
+      }
     },
     "Back" : {
       "extractionState" : "manual",
@@ -55,6 +92,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "バックアップ"
+          }
+        }
+      }
+    },
+    "Bottling" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "びん詰め"
           }
         }
       }
@@ -95,6 +143,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "使用したいシステムを選択してください"
+          }
+        }
+      }
+    },
+    "Cleaning" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清掃"
           }
         }
       }
@@ -142,7 +201,14 @@
       }
     },
     "Create Backup" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バックアップを作成"
+          }
+        }
+      }
     },
     "Create Material" : {
       "localizations" : {
@@ -227,6 +293,17 @@
         }
       }
     },
+    "Destemming\nCrushing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "除梗破砕"
+          }
+        }
+      }
+    },
     "Done" : {
       "localizations" : {
         "ja" : {
@@ -259,6 +336,28 @@
         }
       }
     },
+    "Fermentation" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発酵"
+          }
+        }
+      }
+    },
+    "Filtration" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "濾過"
+          }
+        }
+      }
+    },
     "Get" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -266,6 +365,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "取得"
+          }
+        }
+      }
+    },
+    "Indoor" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "室内"
           }
         }
       }
@@ -297,6 +407,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ログアウト"
+          }
+        }
+      }
+    },
+    "Maceration" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "醸し"
           }
         }
       }
@@ -342,6 +463,17 @@
         }
       }
     },
+    "Measurement" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "測定"
+          }
+        }
+      }
+    },
     "Name" : {
       "localizations" : {
         "ja" : {
@@ -381,6 +513,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "新しいシステム"
+          }
+        }
+      }
+    },
+    "Nitrogen gas filling" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "窒素ガス充填"
           }
         }
       }
@@ -447,6 +590,17 @@
         }
       }
     },
+    "Permissions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "権限"
+          }
+        }
+      }
+    },
     "Placeholder" : {
 
     },
@@ -457,6 +611,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "位置"
+          }
+        }
+      }
+    },
+    "Pressing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "圧搾"
+          }
+        }
+      }
+    },
+    "Racking" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "おり引き"
           }
         }
       }
@@ -478,17 +654,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "レポート詳細"
-          }
-        }
-      }
-    },
-    "Required" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "必須"
           }
         }
       }
@@ -534,6 +699,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "役割名"
+          }
+        }
+      }
+    },
+    "Sampling" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サンプリング"
           }
         }
       }
@@ -610,6 +786,17 @@
         }
       }
     },
+    "Stirring" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "攪拌"
+          }
+        }
+      }
+    },
     "Submit" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -668,17 +855,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "タンクの詳細"
-          }
-        }
-      }
-    },
-    "Tank Name" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "タンク名"
           }
         }
       }

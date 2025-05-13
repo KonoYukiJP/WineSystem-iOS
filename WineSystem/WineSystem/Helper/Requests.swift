@@ -208,4 +208,14 @@ extension NewReportRequest {
         self.value = report.value
         self.note = report.note ?? ""
     }
+    init() {
+        self.date = Date()
+        self.userId = 0
+        self.workId = 0
+        self.operationId = 0
+        self.kindId = 0
+        self.featureId = nil
+        self.value = nil
+        self.note = ""
+    }
 }

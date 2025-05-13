@@ -17,7 +17,7 @@ struct Management: View {
     var body: some View {
         NavigationStack {
             GeometryReader { geometry in
-                let columnCount = Int(geometry.size.width / 144)
+                let columnCount = Int(geometry.size.width / 152)
                 
                 LazyVGrid(columns: Array(repeating: GridItem(.fixed(144)), count: columnCount), spacing: 0) {
                     NavigationLink(

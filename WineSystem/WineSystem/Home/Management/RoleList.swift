@@ -57,7 +57,7 @@ struct RoleList: View {
                                 actions: actions
                             ),
                         label: {
-                            RolePermissionList(
+                            RoleListCell(
                                 role: role,
                                 resources: resources,
                                 actions: actions
@@ -84,7 +84,7 @@ struct RoleList: View {
     }
 }
 
-struct RolePermissionList: View {
+struct RoleListCell: View {
     let role: Role
     let resources: [Resource]
     let actions: [Action]
@@ -94,9 +94,9 @@ struct RolePermissionList: View {
             Text(role.name)
             ForEach(role.permissions) { permission in
                 HStack {
-                    Text(resources.first(where: { $0.id == permission.resourceId})!.localizedResourceName)
+                    Text(resources.first(where: { $0.id == permission.resourceId})!.localizedName)
                     ForEach(permission.actionIds, id: \.self) { actionId in
-                        Text(actions.first(where: { $0.id == actionId})!.localizedActionName)
+                        Text(actions.first(where: { $0.id == actionId})!.localizedName)
                     }
                 }
             }
@@ -114,7 +114,6 @@ struct RoleEditView: View {
     let resources: [Resource]
     @State private var resourcePermissions: [ResourcePermission]
     @State private var alertManager = AlertManager()
-    @State private var isExpanded = true
     
     init(role: Role, resources: [Resource], actions: [Action]) {
         self.role = role
@@ -164,34 +163,35 @@ struct RoleEditView: View {
     
     var body: some View {
         Form {
-            VStack(alignment: .leading) {
-                TextField(
-                    "Role Name",
-                    text: $roleUpdateRequest.name
-                )
-                .onChange(of: roleUpdateRequest.name) {
-                    isAlertingName = false
-                }
-                if isAlertingName {
-                    AlertText("Thie field is required.")
-                }
-            }
-            
-            Section() {}
-            ForEach(resourcePermissions) { resource in
-                let resourceIndex = resourcePermissions.firstIndex(where: { $0.id == resource.id })!
-                DisclosureGroup(resources.first(where: { $0.id == resource.id})!.localizedResourceName, isExpanded: $isExpanded) {
-                    ForEach(resource.actionPermissions) { action in
-                        let actionIndex = resourcePermissions[resourceIndex].actionPermissions.firstIndex(where: { $0.id == action.id })!
-                        Toggle(
-                            actions.first(where: { $0.id == action.id })!.localizedActionName,
-                            isOn: $resourcePermissions[resourceIndex].actionPermissions[actionIndex].isPermitted
-                        )
-                        
+            Section("Name") {
+                VStack(alignment: .leading) {
+                    TextField(
+                        "Role Name",
+                        text: $roleUpdateRequest.name
+                    )
+                    .onChange(of: roleUpdateRequest.name) {
+                        isAlertingName = false
+                    }
+                    if isAlertingName {
+                        AlertText("Thie field is required.")
                     }
                 }
             }
-            .listStyle(.sidebar)
+            
+            Section("Permissions") {
+                ForEach($resourcePermissions) { resource in
+                    DisclosureGroup(resources.first(where: { $0.id == resource.id })!.localizedName, isExpanded: resource.isExpanded) {
+                        ForEach(resource.actionPermissions) { action in
+                            Toggle(
+                                actions.first(where: { $0.id == action.id })!.localizedName,
+                                isOn: action.isPermitted
+                            )
+                            
+                        }
+                    }
+                }
+                .listStyle(.sidebar)
+            }
             
             Section {
                 Button("Delete") {
