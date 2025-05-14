@@ -19,57 +19,60 @@ struct Management: View {
             GeometryReader { geometry in
                 let columnCount = Int(geometry.size.width / 152)
                 
-                LazyVGrid(columns: Array(repeating: GridItem(.fixed(144)), count: columnCount), spacing: 0) {
-                    NavigationLink(
-                        destination:
-                            UserList(),
-                        label: {
-                            TextIcon("User")
-                        }
-                    )
-                    NavigationLink(
-                        destination:
-                            RoleList(),
-                        label: {
-                            TextIcon("Role")
-                        }
-                    )
-                    NavigationLink(
-                        destination:
-                            MaterialList(),
-                        label: {
-                            TextIcon("Material")
-                        }
-                    )
-                    NavigationLink(
-                        destination:
-                            TankList(),
-                        label: {
-                            TextIcon("Tank")
-                        }
-                    )
-                    NavigationLink(
-                        destination:
-                            SensorList(),
-                        label: {
-                            TextIcon("Sensor")
-                        }
-                    )
-                    NavigationLink(
-                        destination:
-                            ReportList(),
-                        label: {
-                            TextIcon("Report")
-                        }
-                    )
-                    NavigationLink(
-                        destination:
-                            BackupList(),
-                        label: {
-                            TextIcon("Backup")
-                        }
-                    )
+                ScrollView {
+                    LazyVGrid(columns: Array(repeating: GridItem(.fixed(144)), count: columnCount), spacing: 0) {
+                        NavigationLink(
+                            destination:
+                                UserList(),
+                            label: {
+                                TextIcon("User")
+                            }
+                        )
+                        NavigationLink(
+                            destination:
+                                RoleList(),
+                            label: {
+                                TextIcon("Role")
+                            }
+                        )
+                        NavigationLink(
+                            destination:
+                                MaterialList(),
+                            label: {
+                                TextIcon("Material")
+                            }
+                        )
+                        NavigationLink(
+                            destination:
+                                TankList(),
+                            label: {
+                                TextIcon("Tank")
+                            }
+                        )
+                        NavigationLink(
+                            destination:
+                                SensorList(),
+                            label: {
+                                TextIcon("Sensor")
+                            }
+                        )
+                        NavigationLink(
+                            destination:
+                                ReportList(),
+                            label: {
+                                TextIcon("Report")
+                            }
+                        )
+                        NavigationLink(
+                            destination:
+                                BackupList(),
+                            label: {
+                                TextIcon("Backup")
+                            }
+                        )
+                    }
                 }
+                
             }
             .navigationTitle("Management")
             .toolbar {

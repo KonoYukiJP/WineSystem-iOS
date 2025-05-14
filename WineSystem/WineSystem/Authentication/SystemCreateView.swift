@@ -11,10 +11,6 @@ import SwiftUI
 struct SystemCreateView: View {
     @Binding var isShowingSheet: Bool
     @State private var systemCreateRequest = SystemCreateRequest()
-    private var years: [Int] {
-        let currentYear = Calendar.current.component(.year, from: Date())
-        return Array((currentYear - 20)...(currentYear + 10))
-    }
     @State private var isShowingPicker = false
     @State private var confirmation: String = ""
     
@@ -23,6 +19,7 @@ struct SystemCreateView: View {
     @State private var isAlertingShortPassword: Bool = false
     @State private var isAlertingWrongPassword: Bool = false
     @State private var alertManager = AlertManager()
+    @FocusState private var focusedFieldNumber: Int?
     
     private func validateSystemInfo() -> Bool {
         let invalidRules: [(condition: Bool, invalidAction: () -> Void)] = [
@@ -65,6 +62,8 @@ struct SystemCreateView: View {
                     isShowingAlert: $isAlertingEmptySystemName,
                     alertText: "This field is required."
                 )
+                .focused($focusedFieldNumber, equals: 0)
+                .onSubmit { focusedFieldNumber = 1 }
                 HStack {
                     Text("Year")
                     Spacer()
@@ -78,7 +77,7 @@ struct SystemCreateView: View {
                         isPresented: $isShowingPicker
                     ) {
                         Picker("", selection: $systemCreateRequest.year) {
-                            ForEach(years, id: \.self) { year in
+                            ForEach(1 ... 4001, id: \.self) { year in
                                 Text("\(year)").tag(year)
                             }
                         }
@@ -92,6 +91,8 @@ struct SystemCreateView: View {
                         isShowingAlert: $isAlertingEmptyAdminName,
                         alertText: "This field is required."
                     )
+                    .focused($focusedFieldNumber, equals: 1)
+                    .onSubmit { focusedFieldNumber = 2 }
                 }
                 Section("Password") {
                     SecureFieldWithAlert(
@@ -100,15 +101,19 @@ struct SystemCreateView: View {
                         isShowingAlert: $isAlertingShortPassword,
                         alertText: "4 or more characters."
                     )
+                    .focused($focusedFieldNumber, equals: 2)
+                    .onSubmit { focusedFieldNumber = 3 }
                     SecureFieldWithAlert(
                         placeholder: "Confirm password",
                         text: $confirmation,
                         isShowingAlert: $isAlertingWrongPassword,
                         alertText: "The passwords you entered do not match."
                     )
+                    .focused($focusedFieldNumber, equals: 3)
+                    .onSubmit { Task { await createSystem() } }
                 }
             }
-            .navigationTitle("System")
+            .navigationTitle("New System")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(action: {
@@ -126,6 +131,7 @@ struct SystemCreateView: View {
                 }
             }
             .alert(manager: alertManager)
+            .onAppear { focusedFieldNumber = 0 }
         }
     }
 }

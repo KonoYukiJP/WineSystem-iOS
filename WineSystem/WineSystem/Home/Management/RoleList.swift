@@ -43,29 +43,31 @@ struct RoleList: View {
 
     var body: some View {
         List {
-            Button("Create Role") {
-                isShowingSheet = true
+            ForEach(roles) { role in
+                NavigationLink(
+                    destination:
+                        RoleEditView(
+                            role: role,
+                            resources: resources,
+                            actions: actions
+                        ),
+                    label: {
+                        RoleListCell(
+                            role: role,
+                            resources: resources,
+                            actions: actions
+                        )
+                    }
+                )
             }
-            
-            Section {
-                ForEach(roles) { role in
-                    NavigationLink(
-                        destination:
-                            RoleEditView(
-                                role: role,
-                                resources: resources,
-                                actions: actions
-                            ),
-                        label: {
-                            RoleListCell(
-                                role: role,
-                                resources: resources,
-                                actions: actions
-                            )
-                        }
-                    )
+            .onDelete(perform: deleteRole)
+        }
+        .navigationTitle("Roles")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Create Role", systemImage: "plus") {
+                    isShowingSheet = true
                 }
-                .onDelete(perform: deleteRole)
             }
         }
         .alert(manager: alertManager)
@@ -92,11 +94,22 @@ struct RoleListCell: View {
     var body: some View {
         VStack(alignment: .leading) {
             Text(role.name)
-            ForEach(role.permissions) { permission in
-                HStack {
-                    Text(resources.first(where: { $0.id == permission.resourceId})!.localizedName)
-                    ForEach(permission.actionIds, id: \.self) { actionId in
-                        Text(actions.first(where: { $0.id == actionId})!.localizedName)
+            HStack {
+                VStack {
+                    ForEach(role.permissions) { permission in
+                        Text(resources.first(where: { $0.id == permission.resourceId})!.localizedName)
+                    }
+                }
+                if !role.permissions.isEmpty {
+                    Divider()
+                }
+                VStack(alignment: .leading) {
+                    ForEach(role.permissions) { permission in
+                        HStack {
+                            ForEach(permission.actionIds, id: \.self) { actionId in
+                                Text(actions.first(where: { $0.id == actionId})!.localizedName)
+                            }
+                        }
                     }
                 }
             }
@@ -200,7 +213,7 @@ struct RoleEditView: View {
                 .foregroundStyle(.red)
             }
         }
-        .navigationTitle("Role Details")
+        .navigationTitle("Details")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") {
@@ -238,16 +251,15 @@ struct RoleCreateView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Role") {
-                    TextFieldWithAlert(
-                        placeholder: "Name",
-                        text: $name,
-                        isShowingAlert: $isAlertingRoleName,
-                        alertText: "This field is required."
-                    )
-                    .focused($focusedFieldNumber, equals: 0)
-                }
+                TextFieldWithAlert(
+                    placeholder: "Name",
+                    text: $name,
+                    isShowingAlert: $isAlertingRoleName,
+                    alertText: "This field is required."
+                )
+                .focused($focusedFieldNumber, equals: 0)
             }
+            .navigationTitle("New Role")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(action: {

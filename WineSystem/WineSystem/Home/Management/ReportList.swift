@@ -59,6 +59,7 @@ struct ReportList: View {
                 )
             }
         }
+        .navigationTitle("Reports")
         .alert(manager: alertManager)
         .task {
             await getReports()
@@ -89,30 +90,33 @@ struct ReportListCell: View {
                 Text("Operation")
                 Text(operations.first(where: { $0.id == report.operationId})?.localizedName ?? "?")
             }
-            HStack {
-                if let operation = operations.first(where: { $0.id == report.operationId }) {
-                    if operation.targetType == .material {
-                        Text("Material")
-                        Text(materials.first(where: { $0.id == report.kindId})?.name ?? "?")
-                    } else {
-                        Text("Tank")
-                        Text(tanks.first(where: { $0.id == report.kindId})?.name ?? "?")
+            Group {
+                HStack {
+                    if let operation = operations.first(where: { $0.id == report.operationId }) {
+                        if operation.targetType == .material {
+                            Text("Material")
+                            Text(materials.first(where: { $0.id == report.kindId})?.name ?? "?")
+                        } else {
+                            Text("Tank")
+                            Text(tanks.first(where: { $0.id == report.kindId})?.name ?? "?")
+                        }
+                    }
+                }
+                HStack {
+                    if let featureId = report.featureId, let value = report.value {
+                        Text(features.first(where: { $0.id == featureId})?.name ?? "?")
+                        Text("\(value)")
+                        Text(features.first(where: { $0.id == featureId})?.unit ?? "?")
+                    }
+                }
+                if let note = report.note {
+                    HStack {
+                        Text("Note")
+                        Text(note)
                     }
                 }
             }
-            HStack {
-                if let featureId = report.featureId, let value = report.value {
-                    Text(features.first(where: { $0.id == featureId})?.name ?? "?")
-                    Text("\(value)")
-                    Text(features.first(where: { $0.id == featureId})?.unit ?? "?")
-                }
-            }
-            if let note = report.note {
-                HStack {
-                    Text("Note")
-                    Text(note)
-                }
-            }
+            .foregroundStyle(.secondary)
         }
     }
 }
@@ -157,13 +161,13 @@ struct ReportEditView: View {
             }
             Picker("Work", selection: $newReportRequest.workId) {
                 ForEach(works) { work in
-                    Text(work.name).tag(work.id)
+                    Text(work.localizedName).tag(work.id)
                 }
             }
             Picker("Operation", selection: $newReportRequest.operationId) {
                 ForEach(works.first(where: {$0.id == newReportRequest.workId})!.operationIds, id: \.self) { operationId in
                     if let operation = operations.first(where: { $0.id == operationId }) {
-                        Text(operation.name)
+                        Text(operation.localizedName)
                             .tag(operation.id)
                     }
                 }

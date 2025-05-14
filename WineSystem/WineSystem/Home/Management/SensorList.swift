@@ -41,46 +41,50 @@ struct SensorList: View {
 
     var body: some View {
         List {
-            Button("Create Sensor") {
-                isShowingSheet = true
-            }
-            Section {
-                ForEach(sensors) { sensor in
-                    NavigationLink(
-                        destination:
-                            SensorEditView(
-                                sensor: sensor,
-                                tanks: tanks,
-                                onUpdateSensor: {
-                                    Task { await getSensors() }
-                                }),
-                        label: {
-                            VStack(alignment: .leading) {
-                                HStack {
-                                    Text(sensor.name)
-                                    Text("\(sensor.unit)")
-                                        .foregroundStyle(.secondary)
-                                }
-                                
-                                Group {
-                                    HStack {
-                                        if let tankName = tanks.first(where: { $0.id == sensor.tankId})?.name {
-                                            Text(tankName)
-                                        }
-                                        if !sensor.position.isEmpty {
-                                            Text(sensor.position)
-                                        }
-                                    }
-                                    Text(sensor.date, formatter: dateFormatter)
-                                }
-                                .foregroundStyle(.secondary)
+            ForEach(sensors) { sensor in
+                NavigationLink(
+                    destination:
+                        SensorEditView(
+                            sensor: sensor,
+                            tanks: tanks,
+                            onUpdateSensor: {
+                                Task { await getSensors() }
+                            }),
+                    label: {
+                        VStack(alignment: .leading) {
+                            HStack {
+                                Text(sensor.name)
+                                Text("[ \(sensor.unit) ]")
+                                    .foregroundStyle(.secondary)
                             }
+                            
+                            Group {
+                                HStack {
+                                    if let tankName = tanks.first(where: { $0.id == sensor.tankId})?.name {
+                                        Text(tankName)
+                                    }
+                                    if !sensor.position.isEmpty {
+                                        Text(sensor.position)
+                                    }
+                                }
+                                Text(sensor.date, formatter: dateFormatter)
+                            }
+                            .foregroundStyle(.secondary)
                         }
-                    )
+                    }
+                )
+            }
+            .onDelete(perform: deleteSensor)
+        }
+        .navigationTitle("Sensors")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Create Sensor", systemImage: "plus") {
+                    isShowingSheet = true
                 }
-                .onDelete(perform: deleteSensor)
             }
         }
+        .alert(manager: alertManager)
         .task {
             await getSensors()
             await getTanks()
@@ -94,104 +98,6 @@ struct SensorList: View {
                     Task { await getSensors() }
                 }
             )
-        }
-        .alert(manager: alertManager)
-    }
-}
-
-struct SensorCreateView: View {
-    @Binding var isShowingSheet: Bool
-    let systemId: Int
-    let tanks: [Tank]
-    let onCreateSensor: () -> Void
-    @State private var name = ""
-    @State private var isAlertingName = false
-    @State private var unit = ""
-    @State private var tankId: Int? = nil
-    @State private var position = ""
-    @State private var date: Date = Date()
-    @State private var alertManager = AlertManager()
-    @FocusState private var focusedFieldNumber: Int?
-    
-    private func createSensor() async {
-        if name.isEmpty {
-            isAlertingName = true
-            return
-        }
-        
-        let newSensorRequest = NewSensorRequest(
-            name: name,
-            unit: unit,
-            tankId: tankId,
-            position: position,
-            date: date
-        )
-        do {
-            try await NetworkService.createSensor(systemId: systemId, newSensorRequest: newSensorRequest)
-            onCreateSensor()
-            isShowingSheet = false
-        } catch let error as NSError {
-            alertManager.show(title: "\(error.code)", message: error.localizedDescription)
-        }
-    }
-    
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section("Sensor") {
-                    TextFieldWithAlert(
-                        placeholder: "Name",
-                        text: $name,
-                        isShowingAlert: $isAlertingName,
-                        alertText: "This field is required."
-                    )
-                    .focused($focusedFieldNumber, equals: 0)
-                    .onSubmit { focusedFieldNumber = 1 }
-                    TextFieldWithAlert(
-                        placeholder: "Unit",
-                        text: $unit,
-                        isShowingAlert: .constant(false),
-                        alertText: "4 or more characters."
-                    )
-                    .focused($focusedFieldNumber, equals: 1)
-                }
-                
-                Section("Position") {
-                    Picker(selection: $tankId) {
-                        Text("None").tag(nil as Int?)
-                        ForEach(tanks) { tank in
-                            Text(tank.name).tag(tank.id)
-                        }
-                    } label: {
-                        Text("Tank")
-                    }
-                    TextFieldWithAlert(
-                        placeholder: "Position",
-                        text: $position,
-                        isShowingAlert: .constant(false),
-                        alertText: "4 or more characters."
-                    )
-                }
-                
-                DatePicker("Date", selection: $date, displayedComponents: .date)
-                
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(action: {
-                        isShowingSheet = false
-                    }) {
-                        Text("Cancel")
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Create") {
-                        Task { await createSensor() }
-                    }
-                }
-            }
-            .alert(manager: alertManager)
-            .onAppear { focusedFieldNumber = 0 }
         }
     }
 }
@@ -288,7 +194,7 @@ struct SensorEditView: View {
                 .foregroundStyle(.red)
             }
         }
-        .navigationTitle("Sensor Details")
+        .navigationTitle("Details")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") {
@@ -297,6 +203,102 @@ struct SensorEditView: View {
             }
         }
         .alert(manager: alertManager)
+    }
+}
+
+struct SensorCreateView: View {
+    @Binding var isShowingSheet: Bool
+    let systemId: Int
+    let tanks: [Tank]
+    let onCreateSensor: () -> Void
+    @State private var name = ""
+    @State private var isAlertingName = false
+    @State private var unit = ""
+    @State private var tankId: Int? = nil
+    @State private var position = ""
+    @State private var date: Date = Date()
+    @State private var alertManager = AlertManager()
+    @FocusState private var focusedFieldNumber: Int?
+    
+    private func createSensor() async {
+        if name.isEmpty {
+            isAlertingName = true
+            return
+        }
+        
+        let newSensorRequest = NewSensorRequest(
+            name: name,
+            unit: unit,
+            tankId: tankId,
+            position: position,
+            date: date
+        )
+        do {
+            try await NetworkService.createSensor(systemId: systemId, newSensorRequest: newSensorRequest)
+            onCreateSensor()
+            isShowingSheet = false
+        } catch let error as NSError {
+            alertManager.show(title: "\(error.code)", message: error.localizedDescription)
+        }
+    }
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextFieldWithAlert(
+                    placeholder: "Name",
+                    text: $name,
+                    isShowingAlert: $isAlertingName,
+                    alertText: "This field is required."
+                )
+                .focused($focusedFieldNumber, equals: 0)
+                .onSubmit { focusedFieldNumber = 1 }
+                TextFieldWithAlert(
+                    placeholder: "Unit",
+                    text: $unit,
+                    isShowingAlert: .constant(false),
+                    alertText: "4 or more characters."
+                )
+                .focused($focusedFieldNumber, equals: 1)
+                
+                Section("Position") {
+                    Picker(selection: $tankId) {
+                        Text("None").tag(nil as Int?)
+                        ForEach(tanks) { tank in
+                            Text(tank.name).tag(tank.id)
+                        }
+                    } label: {
+                        Text("Tank")
+                    }
+                    TextFieldWithAlert(
+                        placeholder: "Position",
+                        text: $position,
+                        isShowingAlert: .constant(false),
+                        alertText: "4 or more characters."
+                    )
+                }
+                
+                DatePicker("Date", selection: $date, displayedComponents: .date)
+                
+            }
+            .navigationTitle("New Sensor")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: {
+                        isShowingSheet = false
+                    }) {
+                        Text("Cancel")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Create") {
+                        Task { await createSensor() }
+                    }
+                }
+            }
+            .alert(manager: alertManager)
+            .onAppear { focusedFieldNumber = 0 }
+        }
     }
 }
 

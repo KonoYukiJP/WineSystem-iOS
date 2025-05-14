@@ -53,43 +53,36 @@ struct SystemSettingsView: View {
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
                 
-                Section() {
-                    NavigationLink {
-                        SystemNameSettingView(system: system, onUpdateSystem: {
-                            Task { await getSystem() }
-                        })
-                    } label: {
-                        HStack {
-                            Text("Name")
-                            Spacer()
-                            Text(system.name)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    NavigationLink {
-                        SystemYearSettingView(system: system, onUpdateSystem: {
-                            Task { await getSystem() }
-                        })
-                    } label: {
-                        HStack {
-                            Text("Year")
-                            Spacer()
-                            Text("\(system.year)")
-                                .foregroundStyle(.secondary)
-                        }
+                Section {}
+                NavigationLink {
+                    SystemNameSettingView(system: system)
+                } label: {
+                    HStack {
+                        Text("Name")
+                        Spacer()
+                        Text(system.name)
+                            .foregroundStyle(.secondary)
                     }
                 }
-                Section() {
-                    Button("Delete") {
-                        deleteSystem()
+                NavigationLink {
+                    SystemYearSettingView(system: system)
+                } label: {
+                    HStack {
+                        Text("Year")
+                        Spacer()
+                        Text("\(system.year)")
+                            .foregroundStyle(.secondary)
                     }
-                    .foregroundStyle(.red)
                 }
+                    
+                Section {}
+                Button("Delete") {
+                    deleteSystem()
+                }
+                .foregroundStyle(.red)
             }
+            .navigationTitle("System Settings")
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("System Settings")
-                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
                         isShowingSheet = false
@@ -110,21 +103,18 @@ struct SystemNameSettingView: View {
     @Environment(\.dismiss) private var dismiss
     let systemId: Int
     @State var systemNameUpdateRequest: SystemNameUpdateRequest
-    let onUpdateSystem: () -> Void
-    @FocusState private var focusedFieldNumber: Int?
+    @FocusState private var isFocused: Bool
     @State private var alertManager = AlertManager()
     
-    init(system: System, onUpdateSystem: @escaping () -> Void) {
+    init(system: System) {
         systemId = system.id
         _systemNameUpdateRequest = State(initialValue: .init(from: system))
-        self.onUpdateSystem = onUpdateSystem
     }
     
     private func updateSystemName() async {
         do {
             try await NetworkService.updateSystemName(systemId: systemId, systemNameUpdateRequest: systemNameUpdateRequest)
             UserDefaults.standard.set(systemNameUpdateRequest.name, forKey: "systemName")
-            onUpdateSystem()
             dismiss()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: "\(error.localizedDescription)")
@@ -133,16 +123,16 @@ struct SystemNameSettingView: View {
     
     var body: some View {
         Form {
-            TextField(
-                "System Name",
-                text: $systemNameUpdateRequest.name
-            )
-            .focused($focusedFieldNumber, equals: 0)
-        }
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text("Name")
+            Section("Name") {
+                TextField(
+                    "System Name",
+                    text: $systemNameUpdateRequest.name
+                )
+                .focused($isFocused)
             }
+        }
+        .navigationTitle("System")
+        .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Change") {
                     Task { await updateSystemName() }
@@ -151,7 +141,7 @@ struct SystemNameSettingView: View {
         }
         .alert(manager: alertManager)
         .onAppear {
-            focusedFieldNumber = 0
+            isFocused = true
         }
     }
 }
@@ -160,23 +150,16 @@ struct SystemYearSettingView: View {
     @Environment(\.dismiss) private var dismiss
     let systemId: Int
     @State var systemYearUpdateRequest: SystemYearUpdateRequest
-    let onUpdateSystem: () -> Void
     @State private var alertManager = AlertManager()
     
-    init(system: System, onUpdateSystem: @escaping () -> Void) {
+    init(system: System) {
         self.systemId = system.id
         _systemYearUpdateRequest = State(initialValue: .init(from: system))
-        self.onUpdateSystem = onUpdateSystem
     }
     
-    private var years: [Int] {
-        let currentYear = Calendar.current.component(.year, from: Date())
-        return Array((currentYear - 20)...(currentYear + 10))
-    }
     private func updateSystemYear() async {
         do {
             try await NetworkService.updateSystemYear(systemId: systemId, systemYearUpdateRequest: systemYearUpdateRequest)
-            onUpdateSystem()
             dismiss()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: "\(error.localizedDescription)")
@@ -186,16 +169,14 @@ struct SystemYearSettingView: View {
     var body: some View {
         Form {
             Picker("Year", selection: $systemYearUpdateRequest.year) {
-                ForEach(years, id: \.self) { year in
+                ForEach(1 ... 4001, id: \.self) { year in
                     Text("\(year)").tag(year)
                 }
             }
             .pickerStyle(.wheel)
         }
+        .navigationTitle("Year")
         .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text("Year")
-            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Change") {
                     Task { await updateSystemYear() }

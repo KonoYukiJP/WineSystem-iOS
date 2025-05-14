@@ -1,56 +1,30 @@
 import SwiftUI
 
 struct TestView2: View {
-    @State private var showPopup: Bool = false
-    @State private var selectedYear: Int = Calendar.current.component(.year, from: Date())
-    @State private var years: [Int] = Array((Calendar.current.component(.year, from: Date()) - 20)...(Calendar.current.component(.year, from: Date()) + 10))
+    let icons: [String] = (1...30).map { _ in "square" } // SF Symbols例
+    let iconsPerPage = 10
+    
+    var pages: [[String]] {
+        stride(from: 0, to: icons.count, by: iconsPerPage).map {
+            Array(icons[$0..<min($0 + iconsPerPage, icons.count)])
+        }
+    }
 
     var body: some View {
-        ZStack {
-            VStack {
-                Button("Select Year") {
-                    withAnimation {
-                        showPopup.toggle()
+        TabView {
+            ForEach(pages.indices, id: \.self) { index in
+                let pageIcons = pages[index]
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2)) {
+                    ForEach(pageIcons, id: \.self) { icon in
+                        Image(systemName: icon)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
                     }
                 }
                 .padding()
-                Text("Selected Year: \(selectedYear)")
-            }
-            
-            if showPopup {
-                Color.black.opacity(0.4) // 背景を暗くする
-                    .edgesIgnoringSafeArea(.all)
-                    .onTapGesture {
-                        withAnimation {
-                            showPopup = false
-                        }
-                    }
-
-                VStack {
-                    Text("Select Year")
-                    Picker("Select Year", selection: $selectedYear) {
-                        ForEach(years, id: \.self) { year in
-                            Text("\(year)").tag(year)
-                        }
-                    }
-                    .pickerStyle(WheelPickerStyle())
-                    .frame(height: 150)
-                    .padding()
-                    
-                    Button("Done") {
-                        withAnimation {
-                            showPopup = false
-                        }
-                    }
-                    .padding()
-                }
-                .background(Color.white)
-                .cornerRadius(10)
-                .shadow(radius: 10)
-                .frame(width: 300, height: 300)
-                .transition(.move(edge: .bottom)) // アニメーション
             }
         }
+        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
     }
 }
 

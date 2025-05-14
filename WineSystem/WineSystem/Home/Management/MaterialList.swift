@@ -33,30 +33,33 @@ struct MaterialList: View {
 
     var body: some View {
         List {
-            Button("Create Material") {
-                isShowingSheet = true
-            }
-            Section {
-                ForEach(materials) { material in
-                    NavigationLink(
-                        destination:
-                            MaterialEditView(
-                                material: material,
-                                onUpdateMaterial: {
-                                    Task { await getMaterials() }
-                                }),
-                        label: {
-                            VStack(alignment: .leading) {
-                                Text(material.name)
-                                if !material.note.isEmpty {
-                                    Text(material.note)
-                                        .foregroundStyle(.secondary)
-                                }
+            ForEach(materials) { material in
+                NavigationLink(
+                    destination:
+                        MaterialEditView(
+                            material: material,
+                            onUpdateMaterial: {
+                                Task { await getMaterials() }
+                            }),
+                    label: {
+                        VStack(alignment: .leading) {
+                            Text(material.name)
+                            if !material.note.isEmpty {
+                                Text(material.note)
+                                    .foregroundStyle(.secondary)
                             }
                         }
-                    )
+                    }
+                )
+            }
+            .onDelete(perform: deleteMaterial)
+        }
+        .navigationTitle("Materials")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Create Material", systemImage: "plus") {
+                    isShowingSheet = true
                 }
-                .onDelete(perform: deleteMaterial)
             }
         }
         .alert(manager: alertManager)
@@ -112,20 +115,19 @@ struct MaterialCreateView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Material") {
-                    TextFieldWithAlert(
-                        placeholder: "Name",
-                        text: $name,
-                        isShowingAlert: $isAlertingMaterialName,
-                        alertText: "This field is required."
-                    )
-                    .focused($focusedFieldNumber, equals: 0)
-                }
+                TextFieldWithAlert(
+                    placeholder: "Name",
+                    text: $name,
+                    isShowingAlert: $isAlertingMaterialName,
+                    alertText: "This field is required."
+                )
+                .focused($focusedFieldNumber, equals: 0)
                 Section(header: Text("Note")) {
                     TextEditor(text: $note)
                         .frame(minHeight: 64)
                 }
             }
+            .navigationTitle("New Material")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") {
@@ -208,7 +210,7 @@ struct MaterialEditView: View {
             }
             .foregroundStyle(.red)
         }
-        .navigationTitle("Material Details")
+        .navigationTitle("Details")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") {

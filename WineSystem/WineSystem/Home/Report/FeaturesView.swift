@@ -39,6 +39,7 @@ struct FeaturesView: View {
                 }
             }
         }
+        .navigationTitle(operation.localizedName)
         .task {
             await getFeatures()
         }

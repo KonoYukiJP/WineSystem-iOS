@@ -60,6 +60,7 @@ struct BackupList: View {
             }
             .onDelete(perform: deleteBackup)
         }
+        .navigationTitle("Backups")
         .alert(manager: alertManager)
         .task {
             await getBackups()

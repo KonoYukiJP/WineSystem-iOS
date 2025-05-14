@@ -18,6 +18,9 @@
     "?" : {
 
     },
+    "[ %@ ]" : {
+
+    },
     "%@" : {
 
     },
@@ -87,6 +90,16 @@
     },
     "Backup" : {
       "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バックアップ"
+          }
+        }
+      }
+    },
+    "Backups" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
@@ -304,6 +317,17 @@
         }
       }
     },
+    "Details" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細"
+          }
+        }
+      }
+    },
     "Done" : {
       "localizations" : {
         "ja" : {
@@ -463,6 +487,16 @@
         }
       }
     },
+    "Materials" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "材料"
+          }
+        }
+      }
+    },
     "Measurement" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -480,6 +514,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "名前"
+          }
+        }
+      }
+    },
+    "New Material" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新規材料"
           }
         }
       }
@@ -506,13 +551,57 @@
         }
       }
     },
+    "New Role" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新規役割"
+          }
+        }
+      }
+    },
+    "New Sensor" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新規センサー"
+          }
+        }
+      }
+    },
     "New System" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "新しいシステム"
+            "value" : "新規システム"
+          }
+        }
+      }
+    },
+    "New Tank" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新規タンク"
+          }
+        }
+      }
+    },
+    "New User" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新規ユーザー"
           }
         }
       }
@@ -653,7 +742,17 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "レポート詳細"
+            "value" : "日報詳細"
+          }
+        }
+      }
+    },
+    "Reports" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日報"
           }
         }
       }
@@ -703,6 +802,16 @@
         }
       }
     },
+    "Roles" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "役割"
+          }
+        }
+      }
+    },
     "Sampling" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -725,6 +834,7 @@
       }
     },
     "Select Year" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
@@ -735,6 +845,7 @@
       }
     },
     "Selected Year: %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
@@ -771,6 +882,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "センサー名"
+          }
+        }
+      }
+    },
+    "Sensors" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "センサー"
           }
         }
       }
@@ -859,6 +980,16 @@
         }
       }
     },
+    "Tanks" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タンク"
+          }
+        }
+      }
+    },
     "The password you entered is incorrect." : {
 
     },
@@ -930,6 +1061,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ユーザー名"
+          }
+        }
+      }
+    },
+    "Users" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユーザー"
           }
         }
       }

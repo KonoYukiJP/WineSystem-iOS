@@ -38,30 +38,27 @@ struct UserSettingsView: View {
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
                 
-                Section() {
-                    NavigationLink {
-                        UsernameSettingView(
-                            userId: userId,
-                            username: username,
-                            onUpdateUsername: {
-                                Task { await getUsername() }
-                            }
-                        )
-                    } label: {
-                        HStack {
-                            Text("Name")
-                            Spacer()
-                            Text(username)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    NavigationLink {
-                        PasswordSettingView(userId: userId)
-                    } label: {
-                        Text("Change Password")
+                Section {}
+                NavigationLink {
+                    UsernameSettingView(
+                        userId: userId,
+                        username: username
+                    )
+                } label: {
+                    HStack {
+                        Text("Name")
+                        Spacer()
+                        Text(username)
+                            .foregroundStyle(.secondary)
                     }
                 }
-                Section() {}
+                NavigationLink {
+                    PasswordSettingView(userId: userId)
+                } label: {
+                    Text("Change Password")
+                }
+                
+                Section {}
                 Button("Logout") {
                     UserDefaults.standard.removeObject(forKey: "systemId")
                     UserDefaults.standard.removeObject(forKey: "userId")
@@ -71,10 +68,8 @@ struct UserSettingsView: View {
                     isLoggedIn = false
                 }
             }
+            .navigationTitle("User Settings")
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("User Settings")
-                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
                         isShowingSheet = false
@@ -94,20 +89,18 @@ struct UsernameSettingView: View {
     @Environment(\.dismiss) private var dismiss
     let userId: Int
     @State var usernameUpdateRequest: UsernameUpdateRequest
-    let onUpdateUsername: () -> Void
     @State private var alertManager = AlertManager()
+    @FocusState private var isFocused: Bool
     
-    init(userId: Int, username: String, onUpdateUsername: @escaping () -> Void) {
+    init(userId: Int, username: String) {
         self.userId = userId
         _usernameUpdateRequest = State(initialValue: .init(from: username))
-        self.onUpdateUsername = onUpdateUsername
     }
     
     private func updateUsername() async {
         do {
             try await NetworkService.updateUsername(userId: userId, usernameUpdateRequest: usernameUpdateRequest)
             UserDefaults.standard.set(usernameUpdateRequest.name, forKey: "username")
-            onUpdateUsername()
             dismiss()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: error.localizedDescription)
@@ -116,11 +109,15 @@ struct UsernameSettingView: View {
     
     var body: some View {
         Form {
-            TextField("Username", text: $usernameUpdateRequest.name)
-                .onSubmit {
-                    Task {await updateUsername() }
-                }
+            Section("Name") {
+                TextField("Username", text: $usernameUpdateRequest.name)
+                    .focused($isFocused)
+                    .onSubmit {
+                        Task {await updateUsername() }
+                    }
+            }
         }
+        .navigationTitle("User")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Change") {
@@ -129,6 +126,9 @@ struct UsernameSettingView: View {
             }
         }
         .alert(manager: alertManager)
+        .onAppear {
+            isFocused = true
+        }
     }
 }
 
@@ -171,17 +171,15 @@ struct PasswordSettingView: View {
     
     var body: some View {
         Form {
-            Section("Password") {
-                SecureFieldWithAlert(
-                    placeholder: "Password",
-                    text: $passwordUpdateRequest.oldPassword,
-                    isShowingAlert: $isShowingPasswordAlert,
-                    alertText: "The password you entered is incorrect."
-                )
-                .focused($focusedFieldNumber, equals: 0)
-                .onSubmit {
-                    focusedFieldNumber = 1
-                }
+            SecureFieldWithAlert(
+                placeholder: "Password",
+                text: $passwordUpdateRequest.oldPassword,
+                isShowingAlert: $isShowingPasswordAlert,
+                alertText: "The password you entered is incorrect."
+            )
+            .focused($focusedFieldNumber, equals: 0)
+            .onSubmit {
+                focusedFieldNumber = 1
             }
             
             Section("New password") {
@@ -208,6 +206,7 @@ struct PasswordSettingView: View {
             }
             
         }
+        .navigationTitle("Password")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Change") {

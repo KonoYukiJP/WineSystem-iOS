@@ -38,5 +38,14 @@ struct TextIcon: View {
 }
 
 #Preview {
-    ButtonIcon(iconName: "Title", action: {})
+    VStack {
+        HStack {
+            ButtonIcon(iconName: "Title", action: {})
+            ButtonIcon(iconName: "Title", action: {})
+        }
+        HStack {
+            ButtonIcon(iconName: "Title", action: {})
+            ButtonIcon(iconName: "Title", action: {})
+        }
+    }
 }

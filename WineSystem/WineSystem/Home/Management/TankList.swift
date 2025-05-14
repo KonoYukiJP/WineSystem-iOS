@@ -41,14 +41,10 @@ struct TankList: View {
 
     var body: some View {
         List {
-            Button("Create Tank") {
-                isShowingSheet = true
-            }
-            Section {}
             ForEach(tanks) { tank in
                 NavigationLink(
                     destination:
-                        EditTankView(
+                        TankEditView(
                             tank: tank,
                             materials: materials,
                             onUpdateTank: {
@@ -70,6 +66,14 @@ struct TankList: View {
                 )
             }
             .onDelete(perform: deleteTank)
+        }
+        .navigationTitle("Tanks")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Create Tank", systemImage: "plus") {
+                    isShowingSheet = true
+                }
+            }
         }
         .alert(manager: alertManager)
         .task {
@@ -93,84 +97,7 @@ struct TankList: View {
     }
 }
 
-private struct TankCreateView: View {
-    @Binding var isShowingSheet: Bool
-    let systemId: Int
-    let materials: [Material]
-    let onCreateTank: () -> Void
-    @State private var name = ""
-    @State private var note = ""
-    @State private var materialId: Int? = nil
-    @State private var isAlertingName = false
-    @State private var alertManager = AlertManager()
-    @FocusState private var focusedFieldNumber: Int?
-    
-    private func createTank() async {
-        if name.isEmpty {
-            isAlertingName = true
-            return
-        }
-        let newTankRequest = NewTankRequest(
-            name: name,
-            note: note,
-            materialId: materialId
-        )
-        do {
-            try await NetworkService.createTank(systemId: systemId, newTankRequest: newTankRequest)
-            onCreateTank()
-            isShowingSheet = false
-        } catch let error as NSError {
-            alertManager.show(title: "\(error.code)", message: error.localizedDescription)
-        }
-    }
-    
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section("Tank") {
-                    TextFieldWithAlert(
-                        placeholder: "Name",
-                        text: $name,
-                        isShowingAlert: $isAlertingName,
-                        alertText: "This field is required."
-                    )
-                    .focused($focusedFieldNumber, equals: 0)
-                    Picker(selection: $materialId) {
-                        Text("None").tag(nil as Int?)
-                        ForEach(materials) { material in
-                            Text(material.name).tag(material.id)
-                        }
-                    } label: {
-                        Text("Material")
-                    }
-                }
-                
-                Section(header: Text("Note")) {
-                    TextEditor(text: $note)
-                        .frame(minHeight: 64)
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(action: {
-                        isShowingSheet = false
-                    }) {
-                        Text("Cancel")
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Create") {
-                        Task { await createTank() }
-                    }
-                }
-            }
-            .alert(manager: alertManager)
-            .onAppear { focusedFieldNumber = 0 }
-        }
-    }
-}
-
-struct EditTankView: View {
+struct TankEditView: View {
     @Environment(\.dismiss) private var dismiss
     let tankId: Int
     @State private var newTankRequest: NewTankRequest
@@ -245,7 +172,7 @@ struct EditTankView: View {
                 .foregroundStyle(.red)
             }
         }
-        .navigationTitle("Tank Details")
+        .navigationTitle("Details")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") {
@@ -254,6 +181,82 @@ struct EditTankView: View {
             }
         }
         .alert(manager: alertManager)
+    }
+}
+
+private struct TankCreateView: View {
+    @Binding var isShowingSheet: Bool
+    let systemId: Int
+    let materials: [Material]
+    let onCreateTank: () -> Void
+    @State private var name = ""
+    @State private var note = ""
+    @State private var materialId: Int? = nil
+    @State private var isAlertingName = false
+    @State private var alertManager = AlertManager()
+    @FocusState private var focusedFieldNumber: Int?
+    
+    private func createTank() async {
+        if name.isEmpty {
+            isAlertingName = true
+            return
+        }
+        let newTankRequest = NewTankRequest(
+            name: name,
+            note: note,
+            materialId: materialId
+        )
+        do {
+            try await NetworkService.createTank(systemId: systemId, newTankRequest: newTankRequest)
+            onCreateTank()
+            isShowingSheet = false
+        } catch let error as NSError {
+            alertManager.show(title: "\(error.code)", message: error.localizedDescription)
+        }
+    }
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextFieldWithAlert(
+                    placeholder: "Name",
+                    text: $name,
+                    isShowingAlert: $isAlertingName,
+                    alertText: "This field is required."
+                )
+                .focused($focusedFieldNumber, equals: 0)
+                Picker(selection: $materialId) {
+                    Text("None").tag(nil as Int?)
+                    ForEach(materials) { material in
+                        Text(material.name).tag(material.id)
+                    }
+                } label: {
+                    Text("Material")
+                }
+                
+                Section(header: Text("Note")) {
+                    TextEditor(text: $note)
+                        .frame(minHeight: 64)
+                }
+            }
+            .navigationTitle("New Tank")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: {
+                        isShowingSheet = false
+                    }) {
+                        Text("Cancel")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Create") {
+                        Task { await createTank() }
+                    }
+                }
+            }
+            .alert(manager: alertManager)
+            .onAppear { focusedFieldNumber = 0 }
+        }
     }
 }
 

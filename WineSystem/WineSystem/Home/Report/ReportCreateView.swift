@@ -60,9 +60,9 @@ struct ReportPostView: View {
     @AppStorage("username") var username: String = ""
     let work: Work
     let operation: Operation
+    let feature: Feature?
     @State private var materials: [Material] = []
     @State private var tanks: [Tank] = []
-    let feature: Feature?
     @State private var newReportRequest = NewReportRequest()
     @State private var alertManager = AlertManager()
     

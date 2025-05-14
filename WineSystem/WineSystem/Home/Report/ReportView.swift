@@ -21,14 +21,15 @@ struct ReportView: View {
             GeometryReader { geometry in
                 let columnCount = Int(geometry.size.width / 152)
                 
-                LazyVGrid(columns: Array(repeating: GridItem(.fixed(144)), count: columnCount), spacing: 0) {
-                    ForEach(works) { work in
-                        NavigationLink {
-                            ReportCreateView(work: work)
-                        } label: {
-                            TextIcon(work.localizedName)
+                ScrollView {
+                    LazyVGrid(columns: Array(repeating: GridItem(.fixed(144)), count: columnCount), spacing: 0) {
+                        ForEach(works) { work in
+                            NavigationLink {
+                                ReportCreateView(work: work)
+                            } label: {
+                                TextIcon(work.localizedName)
+                            }
                         }
-
                     }
                 }
             }
