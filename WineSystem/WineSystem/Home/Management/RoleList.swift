@@ -213,7 +213,7 @@ struct RoleEditView: View {
                 .foregroundStyle(.red)
             }
         }
-        .navigationTitle("Details")
+        .navigationTitle("Edit")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") {

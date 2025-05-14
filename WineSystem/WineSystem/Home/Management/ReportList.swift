@@ -211,7 +211,7 @@ struct ReportEditView: View {
             }
         }
         .pickerStyle(.navigationLink)
-        .navigationTitle("Report Detail")
+        .navigationTitle("Edit")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") {

@@ -38,9 +38,7 @@ struct MaterialList: View {
                     destination:
                         MaterialEditView(
                             material: material,
-                            onUpdateMaterial: {
-                                Task { await getMaterials() }
-                            }),
+                        ),
                     label: {
                         VStack(alignment: .leading) {
                             Text(material.name)
@@ -54,7 +52,7 @@ struct MaterialList: View {
             }
             .onDelete(perform: deleteMaterial)
         }
-        .navigationTitle("Materials")
+        .navigationTitle("Edit")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Create Material", systemImage: "plus") {
@@ -88,10 +86,6 @@ struct MaterialCreateView: View {
     @State private var alertManager = AlertManager()
     @FocusState private var focusedFieldNumber: Int?
     
-    struct NewMaterial: Codable {
-        let name: String
-        let note: String
-    }
     private func createMaterial() async {
         if name.isEmpty {
             isAlertingMaterialName = true
@@ -150,14 +144,12 @@ struct MaterialEditView: View {
     @Environment(\.dismiss) private var dismiss
     let materialId: Int
     @State private var newMaterialRequest: NewMaterialRequest
-    let onUpdateMaterial: () -> Void
     @State private var isAlertingName = false
     @State private var alertManager = AlertManager()
     
-    init(material: Material, onUpdateMaterial: @escaping () -> Void) {
+    init(material: Material) {
         materialId = material.id
         _newMaterialRequest = State(initialValue: .init(from: material))
-        self.onUpdateMaterial = onUpdateMaterial
     }
     
     private func updateMaterial() async {
@@ -167,7 +159,6 @@ struct MaterialEditView: View {
         }
         do {
             try await NetworkService.updateMaterial(materialId: materialId, newMaterialRequest: newMaterialRequest)
-            onUpdateMaterial()
             dismiss()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: error.localizedDescription)
@@ -177,7 +168,6 @@ struct MaterialEditView: View {
         Task {
             do {
                 try await NetworkService.deleteMaterial(materialId: materialId)
-                onUpdateMaterial()
                 dismiss()
             } catch let error as NSError {
                 alertManager.show(title: "\(error.code)", message: error.localizedDescription)
@@ -210,7 +200,7 @@ struct MaterialEditView: View {
             }
             .foregroundStyle(.red)
         }
-        .navigationTitle("Details")
+        .navigationTitle("Material")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") {
