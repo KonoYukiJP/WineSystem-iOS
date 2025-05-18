@@ -8,9 +8,9 @@
 import Foundation
 
 struct NetworkService {
-    static let apiRootURL: String = "http://127.0.0.1:5000"
+    //static let apiRootURL: String = "http://127.0.0.1:5000"
     //static let apiRootURL: String = "http://163.43.218.237"
-    //static let apiRootURL: String = "https://winesystem.servehttp.com"
+    static let apiRootURL: String = "https://winesystem.servehttp.com"
     
     private static func get<T: Decodable>(path: String) async throws -> T {
         guard let url = URL(string: "\(apiRootURL)\(path)") else {
