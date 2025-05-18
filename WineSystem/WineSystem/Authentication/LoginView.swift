@@ -10,6 +10,7 @@ import SwiftUI
 struct LoginView: View {
     @Binding var isShowingSheet: Bool
     @Binding var isLoggedIn: Bool
+    @State private var systemId = 0
     @State private var loginRequest = LoginRequest()
     @State private var systems: [System] = []
     @State private var users: [User] = []
@@ -20,8 +21,8 @@ struct LoginView: View {
     private func getSystems() async {
         do {
             systems = try await NetworkService.getSystems()
-            if !systems.contains(where: { $0.id == loginRequest.systemId }) {
-                loginRequest.systemId = systems.first?.id ?? 0
+            if !systems.contains(where: { $0.id == systemId }) {
+                systemId = systems.first?.id ?? 0
             } else {
                 await getUsers()
             }
@@ -34,7 +35,7 @@ struct LoginView: View {
     }
     private func getUsers() async {
         do {
-            users = try await NetworkService.getUsers(systemId: loginRequest.systemId)
+            users = try await NetworkService.getUsers(systemId: systemId)
             if !users.contains(where: { $0.id == loginRequest.userId }) {
                 loginRequest.userId = self.users.first?.id ?? 0
             }
@@ -47,22 +48,24 @@ struct LoginView: View {
     }
     private func login() async {
         do {
-            try await NetworkService.login(loginRequest: loginRequest)
-            UserDefaults.standard.set(loginRequest.systemId, forKey: "systemId")
+            let token = try await NetworkService.login(systemId: systemId, loginRequest: loginRequest)
+            UserDefaults.standard.set(systemId, forKey: "systemId")
             UserDefaults.standard.set(loginRequest.userId, forKey: "userId")
-            UserDefaults.standard.set(systems.first(where: { $0.id == loginRequest.systemId })!.name, forKey: "systemName")
+            UserDefaults.standard.set(systems.first(where: { $0.id == systemId })!.name, forKey: "systemName")
             UserDefaults.standard.set(users.first(where: { $0.id == loginRequest.userId})!.name, forKey: "username")
+            UserDefaults.standard.set(token, forKey: "token")
+            print(token)
             isShowingSheet = false
             isLoggedIn = true
         } catch let error as NSError {
-            alertManager.show(title: "\(error.code)", message: "Failed to login: \(error.localizedDescription)")
+            alertManager.show(title: "\(error.code)", message: "\(error.localizedDescription)")
         }
     }
 
     var body: some View {
         NavigationStack {
             Form {
-                Picker(selection: $loginRequest.systemId) {
+                Picker(selection: $systemId) {
                     ForEach(systems) { system in
                         Text(system.name).tag(system.id)
                     }
@@ -73,7 +76,7 @@ struct LoginView: View {
                 .task {
                     await getSystems()
                 }
-                .onChange(of: loginRequest.systemId) {
+                .onChange(of: systemId) {
                     Task { await getUsers() }
                 }
                 

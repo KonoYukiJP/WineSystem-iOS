@@ -8,9 +8,11 @@
 import Foundation
 
 struct LoginRequest: Codable {
-    var systemId: Int
     var userId: Int
     var password: String
+    private enum CodingKeys: String, CodingKey {
+        case userId = "user_id", password
+    }
 }
 struct SystemCreateRequest: Encodable {
     var name: String
@@ -118,7 +120,6 @@ struct BackupUpdateRequest: Encodable {
 }
 extension LoginRequest {
     init() {
-        systemId = 0
         userId = 0
         password = ""
     }

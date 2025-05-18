@@ -8,10 +8,12 @@
 import Foundation
 import SwiftUICore
 
-struct Response: Codable {
+struct Response: Decodable {
     let message: String
 }
-
+struct LoginResponse: Decodable {
+    let token: String
+}
 struct Value: Decodable {
     var value: String
 }

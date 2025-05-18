@@ -52,7 +52,7 @@ struct MaterialList: View {
             }
             .onDelete(perform: deleteMaterial)
         }
-        .navigationTitle("Edit")
+        .navigationTitle("Material")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Create Material", systemImage: "plus") {
@@ -200,7 +200,7 @@ struct MaterialEditView: View {
             }
             .foregroundStyle(.red)
         }
-        .navigationTitle("Material")
+        .navigationTitle("Edit")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") {
