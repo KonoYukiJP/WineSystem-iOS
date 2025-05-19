@@ -8,9 +8,9 @@
 import Foundation
 
 struct NetworkService {
-    //static let apiRootURL: String = "http://127.0.0.1:5000"
+    static let apiRootURL: String = "http://127.0.0.1:5000"
     //static let apiRootURL: String = "http://163.43.218.237"
-    static let apiRootURL: String = "https://winesystem.servehttp.com"
+    //static let apiRootURL: String = "https://winesystem.servehttp.com"
     
     private static func get<T: Decodable>(path: String) async throws -> T {
         guard let url = URL(string: "\(apiRootURL)\(path)") else {
@@ -43,9 +43,9 @@ struct NetworkService {
     static func getUsers(systemId: Int) async throws -> [User] {
         return try await get(path: "/systems/\(systemId)/users")
     }
-    static func getUsername(userId: Int) async throws -> String {
-        let value: Value = try await get(path: "/users/\(userId)/name")
-        return value.value
+    static func getUsername() async throws -> String {
+        let username: String = try await get(path: "/users/me/name")
+        return username
     }
     static func getRoles(systemId: Int) async throws -> [Role] {
         return try await get(path: "/systems/\(systemId)/roles")
@@ -181,11 +181,11 @@ struct NetworkService {
             throw NSError(domain: NSURLErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: response.message])
         }
     }
-    static func updateUsername(userId: Int, usernameUpdateRequest: UsernameUpdateRequest) async throws {
-        try await put(path: "/users/\(userId)/name", body: usernameUpdateRequest)
+    static func updateUsername(usernameUpdateRequest: UsernameUpdateRequest) async throws {
+        try await put(path: "/users/me/name", body: usernameUpdateRequest)
     }
-    static func updatePassword(userId: Int, passwordUpdateRequest: PasswordUpdateRequest) async throws {
-        try await put(path: "/users/\(userId)/password", body: passwordUpdateRequest)
+    static func updatePassword(passwordUpdateRequest: PasswordUpdateRequest) async throws {
+        try await put(path: "/users/ma/password", body: passwordUpdateRequest)
     }
     static func updateMaterial(materialId: Int, newMaterialRequest: NewMaterialRequest) async throws {
         try await put(path: "/materials/\(materialId)", body: newMaterialRequest)
@@ -212,6 +212,9 @@ struct NetworkService {
         var request = URLRequest(url: url)
         request.httpMethod = "PATCH"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if let token = UserDefaults.standard.string(forKey: "token") {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         request.httpBody = try encoder.encode(body)
@@ -242,10 +245,13 @@ struct NetworkService {
         if let token = UserDefaults.standard.string(forKey: "token") {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
-        let (_, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            let response = try JSONDecoder().decode(Response.self, from: data)
+            throw NSError(domain: NSURLErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: response.message])
         }
     }
     static func deleteSystem(systemId: Int) async throws {

@@ -94,21 +94,14 @@ struct RoleListCell: View {
     var body: some View {
         VStack(alignment: .leading) {
             Text(role.name)
-            HStack {
-                VStack {
-                    ForEach(role.permissions) { permission in
+            Text("Permissions")
+            Grid {
+                ForEach(role.permissions) { permission in
+                    GridRow {
                         Text(resources.first(where: { $0.id == permission.resourceId})!.localizedName)
-                    }
-                }
-                if !role.permissions.isEmpty {
-                    Divider()
-                }
-                VStack(alignment: .leading) {
-                    ForEach(role.permissions) { permission in
-                        HStack {
-                            ForEach(permission.actionIds, id: \.self) { actionId in
-                                Text(actions.first(where: { $0.id == actionId})!.localizedName)
-                            }
+                        ForEach(actions) { action in
+                            let isPermitted = permission.actionIds.contains(action.id)
+                            Text(isPermitted ? action.localizedName : "")
                         }
                     }
                 }

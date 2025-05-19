@@ -14,9 +14,6 @@ struct Response: Decodable {
 struct LoginResponse: Decodable {
     let token: String
 }
-struct Value: Decodable {
-    var value: String
-}
 
 struct Item: Identifiable, Hashable, Decodable {
     var id: Int

@@ -9,14 +9,13 @@ import SwiftUI
 
 struct UserSettingsView: View {
     @AppStorage("isLoggedIn") private var isLoggedIn = false
-    @AppStorage("userId") private var userId: Int = 0
     @Binding var isShowingSheet: Bool
     @State private var username: String = ""
     @State private var alertManager = AlertManager()
     
     private func getUsername() async {
         do {
-            username = try await NetworkService.getUsername(userId: userId)
+            username = try await NetworkService.getUsername()
         } catch let error as NSError {
             alertManager.show(
                 title: "\(error.code)",
@@ -41,7 +40,6 @@ struct UserSettingsView: View {
                 Section {}
                 NavigationLink {
                     UsernameSettingView(
-                        userId: userId,
                         username: username
                     )
                 } label: {
@@ -53,7 +51,7 @@ struct UserSettingsView: View {
                     }
                 }
                 NavigationLink {
-                    PasswordSettingView(userId: userId)
+                    PasswordSettingView()
                 } label: {
                     Text("Change Password")
                 }
@@ -87,19 +85,17 @@ struct UserSettingsView: View {
 
 struct UsernameSettingView: View {
     @Environment(\.dismiss) private var dismiss
-    let userId: Int
     @State var usernameUpdateRequest: UsernameUpdateRequest
     @State private var alertManager = AlertManager()
     @FocusState private var isFocused: Bool
     
-    init(userId: Int, username: String) {
-        self.userId = userId
+    init(username: String) {
         _usernameUpdateRequest = State(initialValue: .init(from: username))
     }
     
     private func updateUsername() async {
         do {
-            try await NetworkService.updateUsername(userId: userId, usernameUpdateRequest: usernameUpdateRequest)
+            try await NetworkService.updateUsername(usernameUpdateRequest: usernameUpdateRequest)
             UserDefaults.standard.set(usernameUpdateRequest.name, forKey: "username")
             dismiss()
         } catch let error as NSError {
@@ -134,7 +130,6 @@ struct UsernameSettingView: View {
 
 struct PasswordSettingView: View {
     @Environment(\.dismiss) private var dismiss
-    let userId: Int
     @State private var passwordUpdateRequest = PasswordUpdateRequest()
     @State private var verifyNewPassword = ""
     @State private var isShowingPasswordAlert: Bool = false
@@ -158,7 +153,7 @@ struct PasswordSettingView: View {
     private func updatePassword() async {
         if !validateNewPassword() { return }
         do {
-            try await NetworkService.updatePassword(userId: userId, passwordUpdateRequest: passwordUpdateRequest)
+            try await NetworkService.updatePassword(passwordUpdateRequest: passwordUpdateRequest)
             dismiss()
         } catch let error as NSError {
             if error.code == 400 {

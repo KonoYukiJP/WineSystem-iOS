@@ -296,6 +296,9 @@
       }
     },
     "Delete" : {
+
+    },
+    "DELETE" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
@@ -393,7 +396,7 @@
         }
       }
     },
-    "Get" : {
+    "GET" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
@@ -478,34 +481,12 @@
         }
       }
     },
-    "Material Details" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "材料編集"
-          }
-        }
-      }
-    },
     "Material Name" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "材料名"
-          }
-        }
-      }
-    },
-    "Materials" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "材料一覧"
           }
         }
       }
@@ -717,6 +698,17 @@
         }
       }
     },
+    "POST" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作成"
+          }
+        }
+      }
+    },
     "Pressing" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -724,6 +716,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "圧搾"
+          }
+        }
+      }
+    },
+    "PUT" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新"
           }
         }
       }
@@ -750,23 +753,23 @@
         }
       }
     },
-    "Report Detail" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "日報詳細"
-          }
-        }
-      }
-    },
     "Reports" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "日報"
+          }
+        }
+      }
+    },
+    "Resource" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "資源"
           }
         }
       }
@@ -787,17 +790,6 @@
     },
     "Role" : {
       "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "役割"
-          }
-        }
-      }
-    },
-    "Role Details" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
@@ -848,28 +840,6 @@
         }
       }
     },
-    "Select Year" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "年度を選択"
-          }
-        }
-      }
-    },
-    "Selected Year: %lld" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選択された年度"
-          }
-        }
-      }
-    },
     "Sensor" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -877,17 +847,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "センサー"
-          }
-        }
-      }
-    },
-    "Sensor Details" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "センサー詳細"
           }
         }
       }
@@ -986,17 +945,6 @@
         }
       }
     },
-    "Tank Details" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "タンク詳細"
-          }
-        }
-      }
-    },
     "Tanks" : {
       "localizations" : {
         "ja" : {
@@ -1030,34 +978,12 @@
         }
       }
     },
-    "Update" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "更新"
-          }
-        }
-      }
-    },
     "User" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "ユーザー"
-          }
-        }
-      }
-    },
-    "User Details" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ユーザー編集"
           }
         }
       }
