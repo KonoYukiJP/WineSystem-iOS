@@ -272,6 +272,9 @@ struct NetworkService {
     static func deleteTank(tankId: Int) async throws {
         try await delete(path: "/tanks/\(tankId)")
     }
+    static func deleteReport(reportId: Int) async throws {
+        try await delete(path: "/reports/\(reportId)")
+    }
     static func deleteBackup(filename: String) async throws {
         try await delete(path: "/backups/\(filename)")
     }

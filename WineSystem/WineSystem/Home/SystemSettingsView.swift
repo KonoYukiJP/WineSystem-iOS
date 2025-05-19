@@ -55,7 +55,12 @@ struct SystemSettingsView: View {
                 
                 Section {}
                 NavigationLink {
-                    SystemNameSettingView(system: system)
+                    SystemNameSettingView(
+                        system: system,
+                        onUpdateSystem: {
+                            Task { await getSystem() }
+                        }
+                    )
                 } label: {
                     HStack {
                         Text("Name")
@@ -65,7 +70,12 @@ struct SystemSettingsView: View {
                     }
                 }
                 NavigationLink {
-                    SystemYearSettingView(system: system)
+                    SystemYearSettingView(
+                        system: system,
+                        onUpdateSystem: {
+                            Task { await getSystem() }
+                        }
+                    )
                 } label: {
                     HStack {
                         Text("Year")
@@ -103,18 +113,21 @@ struct SystemNameSettingView: View {
     @Environment(\.dismiss) private var dismiss
     let systemId: Int
     @State var systemNameUpdateRequest: SystemNameUpdateRequest
+    let onUpdateSystem: () -> Void
     @FocusState private var isFocused: Bool
     @State private var alertManager = AlertManager()
     
-    init(system: System) {
+    init(system: System, onUpdateSystem: @escaping () -> Void) {
         systemId = system.id
         _systemNameUpdateRequest = State(initialValue: .init(from: system))
+        self.onUpdateSystem = onUpdateSystem
     }
     
     private func updateSystemName() async {
         do {
             try await NetworkService.updateSystemName(systemId: systemId, systemNameUpdateRequest: systemNameUpdateRequest)
             UserDefaults.standard.set(systemNameUpdateRequest.name, forKey: "systemName")
+            onUpdateSystem()
             dismiss()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: "\(error.localizedDescription)")
@@ -150,16 +163,19 @@ struct SystemYearSettingView: View {
     @Environment(\.dismiss) private var dismiss
     let systemId: Int
     @State var systemYearUpdateRequest: SystemYearUpdateRequest
+    let onUpdateSystem: () -> Void
     @State private var alertManager = AlertManager()
     
-    init(system: System) {
+    init(system: System, onUpdateSystem: @escaping () -> Void) {
         self.systemId = system.id
         _systemYearUpdateRequest = State(initialValue: .init(from: system))
+        self.onUpdateSystem = onUpdateSystem
     }
     
     private func updateSystemYear() async {
         do {
             try await NetworkService.updateSystemYear(systemId: systemId, systemYearUpdateRequest: systemYearUpdateRequest)
+            onUpdateSystem()
             dismiss()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: "\(error.localizedDescription)")

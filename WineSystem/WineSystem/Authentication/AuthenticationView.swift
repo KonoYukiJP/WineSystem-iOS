@@ -15,8 +15,8 @@ struct AuthenticationView: View {
     @State private var loginRequest = LoginRequest()
     @State private var systems: [System] = []
     @State private var isShowingPasswordAlert = false
-    
     @State private var alertManager = AlertManager()
+    @FocusState private var focusedFieldNumber: Int?
     
     private func getSystems() async {
         do {
@@ -61,10 +61,15 @@ struct AuthenticationView: View {
                 
                 Section {
                     TextField("Username", text: $loginRequest.username)
+                        .focused($focusedFieldNumber, equals: 0)
+                        .onSubmit {
+                            focusedFieldNumber = 1
+                        }
                     SecureField("Password", text: $loginRequest.password)
-                    .onSubmit {
-                        Task { await login( )}
-                    }
+                        .focused($focusedFieldNumber, equals: 1)
+                        .onSubmit {
+                            Task { await login( )}
+                        }
                 }
             }
             .navigationTitle("Wine System")
@@ -82,7 +87,9 @@ struct AuthenticationView: View {
                 }
             }
             .alert(manager: alertManager)
-            
+            .onAppear {
+                focusedFieldNumber = 0
+            }
         }
     }
 }

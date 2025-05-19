@@ -40,7 +40,10 @@ struct UserSettingsView: View {
                 Section {}
                 NavigationLink {
                     UsernameSettingView(
-                        username: username
+                        username: username,
+                        onUpdateUser: {
+                            Task { await getUsername() }
+                        }
                     )
                 } label: {
                     HStack {
@@ -86,17 +89,20 @@ struct UserSettingsView: View {
 struct UsernameSettingView: View {
     @Environment(\.dismiss) private var dismiss
     @State var usernameUpdateRequest: UsernameUpdateRequest
+    let onUpdateUser: () -> Void
     @State private var alertManager = AlertManager()
     @FocusState private var isFocused: Bool
     
-    init(username: String) {
+    init(username: String, onUpdateUser: @escaping () -> Void) {
         _usernameUpdateRequest = State(initialValue: .init(from: username))
+        self.onUpdateUser = onUpdateUser
     }
     
     private func updateUsername() async {
         do {
             try await NetworkService.updateUsername(usernameUpdateRequest: usernameUpdateRequest)
             UserDefaults.standard.set(usernameUpdateRequest.name, forKey: "username")
+            onUpdateUser()
             dismiss()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: error.localizedDescription)

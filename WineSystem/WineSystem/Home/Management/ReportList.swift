@@ -122,6 +122,7 @@ struct ReportListCell: View {
 }
 
 struct ReportEditView: View {
+    @Environment(\.dismiss) private var dismiss
     let systemId: Int
     let report: Report
     @State var newReportRequest: NewReportRequest
@@ -143,6 +144,16 @@ struct ReportEditView: View {
         self.features = features
         self.materials = materials
         self.tanks = tanks
+    }
+    private func deleteReport() {
+        Task {
+            do {
+                try await NetworkService.deleteReport(reportId: report.id)
+                dismiss()
+            } catch let error as NSError {
+                alertManager.show(title: "\(error.code)", message: error.localizedDescription)
+            }
+        }
     }
     
     var body: some View {
@@ -172,7 +183,7 @@ struct ReportEditView: View {
                     }
                 }
             }
-            if newReportRequest.workId == 1 {
+            if operations.first(where: { $0.id == newReportRequest.operationId})!.targetType == .material {
                 Picker("Material", selection: $newReportRequest.kindId) {
                     ForEach(materials) { material in
                         Text(material.name).tag(material.id)
@@ -185,7 +196,7 @@ struct ReportEditView: View {
                     }
                 }
             }
-            if [4, 13, 17].contains(where: { $0 == newReportRequest.operationId }) {
+            if !operations.first(where: { $0.id == newReportRequest.operationId})!.featureIds.isEmpty {
                 Picker("Feature", selection: $newReportRequest.featureId) {
                     ForEach(features) { feature in
                         Text(feature.name).tag(feature.id)
@@ -208,6 +219,13 @@ struct ReportEditView: View {
                     Spacer()
                     Text(newReportRequest.note)
                 }
+            }
+            
+            Section {
+                Button("Delete") {
+                    deleteReport()
+                }
+                .foregroundStyle(.red)
             }
         }
         .pickerStyle(.navigationLink)

@@ -296,10 +296,6 @@
       }
     },
     "Delete" : {
-
-    },
-    "DELETE" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
@@ -396,7 +392,7 @@
         }
       }
     },
-    "GET" : {
+    "Get" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
@@ -698,7 +694,7 @@
         }
       }
     },
-    "POST" : {
+    "Post" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
@@ -716,17 +712,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "圧搾"
-          }
-        }
-      }
-    },
-    "PUT" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "更新"
           }
         }
       }
@@ -974,6 +959,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "単位"
+          }
+        }
+      }
+    },
+    "Update" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新"
           }
         }
       }
