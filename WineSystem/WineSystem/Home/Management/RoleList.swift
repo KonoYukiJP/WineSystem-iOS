@@ -80,7 +80,9 @@ struct RoleList: View {
                 systemId: systemId,
                 onCreateRole: {
                     Task { await getRoles() }
-                }
+                },
+                resources: resources,
+                actions: actions
             )
         }
     }
@@ -114,41 +116,33 @@ struct RoleListCell: View {
 struct RoleEditView: View {
     @Environment(\.dismiss) private var dismiss
     let role: Role
-    @State var roleUpdateRequest: RoleUpdateRequest
+    @State var name: String
     @State private var isAlertingName = false
     let actions: [Action]
     let resources: [Resource]
-    @State private var resourcePermissions: [ResourcePermission]
+    @State private var permissions: Permissions
     @State private var alertManager = AlertManager()
     
     init(role: Role, resources: [Resource], actions: [Action]) {
         self.role = role
-        _roleUpdateRequest = State(initialValue: .init(from: role))
+        _name = State(initialValue: role.name)
         self.resources = resources
         self.actions = actions
-        _resourcePermissions = State(initialValue: role.toResourcePermissions(resources: resources, actions: actions))
+        _permissions = State(initialValue: role.toResourcePermissions(resources: resources, actions: actions))
     }
     
     private func updateRole() async {
-        if roleUpdateRequest.name.isEmpty {
+        if name.isEmpty {
             isAlertingName = true
             return
         }
-        let permissions: [Permission] = resourcePermissions.toPermissions()
-        roleUpdateRequest.inserts = []
-        roleUpdateRequest.deletes = []
-        for resource in resources {
-            let old = Set(role.permissions.first(where: { $0.resourceId == resource.id })?.actionIds ?? [])
-            let new = Set(permissions.first(where: { $0.resourceId == resource.id })?.actionIds ?? [])
-            let insertsActionIds = Array(new.subtracting(old))
-            if !insertsActionIds.isEmpty {
-                roleUpdateRequest.inserts.append(Permission(resourceId: resource.id, actionIds: insertsActionIds))
-            }
-            let deletesActionIds = Array(old.subtracting(new))
-            if !deletesActionIds.isEmpty {
-                roleUpdateRequest.deletes.append(Permission(resourceId: resource.id, actionIds: deletesActionIds))
-            }
-        }
+        let permissions: [Permission] = permissions.toPermissions()
+        let roleUpdateRequest = RoleUpdateRequest(
+            name: name,
+            resources: resources,
+            oldPermissions: role.permissions,
+            newPermissions: permissions
+        )
         do {
             try await NetworkService.updateRole(roleId: role.id, roleUpdateRequest: roleUpdateRequest)
             dismiss()
@@ -173,9 +167,9 @@ struct RoleEditView: View {
                 VStack(alignment: .leading) {
                     TextField(
                         "Role Name",
-                        text: $roleUpdateRequest.name
+                        text: $name
                     )
-                    .onChange(of: roleUpdateRequest.name) {
+                    .onChange(of: name) {
                         isAlertingName = false
                     }
                     if isAlertingName {
@@ -185,9 +179,9 @@ struct RoleEditView: View {
             }
             
             Section("Permissions") {
-                ForEach($resourcePermissions) { resource in
+                ForEach($permissions.resources) { resource in
                     DisclosureGroup(resources.first(where: { $0.id == resource.id })!.localizedName, isExpanded: resource.isExpanded) {
-                        ForEach(resource.actionPermissions) { action in
+                        ForEach(resource.actions) { action in
                             Toggle(
                                 actions.first(where: { $0.id == action.id })!.localizedName,
                                 isOn: action.isPermitted
@@ -224,16 +218,29 @@ struct RoleCreateView: View {
     let onCreateRole: () -> Void
     @State private var name = ""
     @State private var isAlertingRoleName = false
+    let resources: [Resource]
+    let actions: [Action]
+    @State private var permissions: Permissions
     @State private var alertManager = AlertManager()
-    @FocusState private var focusedFieldNumber: Int?
+    @FocusState private var isFocused: Bool
+    
+    init(isShowingSheet: Binding<Bool>, systemId: Int, onCreateRole: @escaping () -> Void, resources: [Resource], actions: [Action]) {
+        _isShowingSheet = isShowingSheet
+        self.systemId = systemId
+        self.onCreateRole = onCreateRole
+        self.resources = resources
+        self.actions = actions
+        _permissions = State(initialValue: .init(resources: resources, actions: actions))
+    }
     
     private func createRole() async {
         if name.isEmpty {
             isAlertingRoleName = true
             return
         }
+        let roleCreateRequest = RoleCreateRequest(name: name, permissions: permissions.toPermissions())
         do {
-            try await NetworkService.createRole(systemId: systemId, roleCreateRequest: .init(name: name))
+            try await NetworkService.createRole(systemId: systemId, roleCreateRequest: roleCreateRequest)
             onCreateRole()
             isShowingSheet = false
         } catch let error as NSError {
@@ -250,7 +257,22 @@ struct RoleCreateView: View {
                     isShowingAlert: $isAlertingRoleName,
                     alertText: "This field is required."
                 )
-                .focused($focusedFieldNumber, equals: 0)
+                .focused($isFocused)
+                
+                Section("Permissions") {
+                    ForEach($permissions.resources) { resource in
+                        DisclosureGroup(resources.first(where: { $0.id == resource.id })!.localizedName, isExpanded: resource.isExpanded) {
+                            ForEach(resource.actions) { action in
+                                Toggle(
+                                    actions.first(where: { $0.id == action.id })!.localizedName,
+                                    isOn: action.isPermitted
+                                )
+                                
+                            }
+                        }
+                    }
+                    .listStyle(.sidebar)
+                }
             }
             .navigationTitle("New Role")
             .toolbar {
@@ -268,7 +290,7 @@ struct RoleCreateView: View {
                 }
             }
             .alert(manager: alertManager)
-            .onAppear { focusedFieldNumber = 0 }
+            .onAppear { isFocused = true }
         }
     }
 }

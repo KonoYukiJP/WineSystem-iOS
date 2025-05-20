@@ -53,6 +53,7 @@ struct NewSensorRequest: Encodable {
 }
 struct RoleCreateRequest: Encodable {
     let name: String
+    let permissions: [Permission]
 }
 struct NewReportRequest: Encodable {
     var date: Date
@@ -97,15 +98,8 @@ struct PasswordUpdateRequest: Encodable {
     }
 }
 
-struct ResourceActionPair: Hashable, Encodable {
-    var resourceId: Int
-    var actionId: Int
-    private enum CodingKeys: String, CodingKey {
-        case resourceId = "resource_id", actionId = "action_id"
-    }
-}
 struct RoleUpdateRequest: Encodable {
-    var name: String
+    let name: String
     var inserts: [Permission]
     var deletes: [Permission]
 }
@@ -166,13 +160,6 @@ extension PasswordUpdateRequest {
         newPassword = ""
     }
 }
-extension RoleUpdateRequest {
-    init(from role: Role) {
-        self.name = role.name
-        self.inserts = []
-        self.deletes = []
-    }
-}
 extension NewMaterialRequest {
     init(from material: Material) {
         self.name = material.name
@@ -217,3 +204,31 @@ extension NewReportRequest {
         self.note = ""
     }
 }
+extension RoleUpdateRequest {
+    init(
+        name: String,
+        resources: [Resource],
+        oldPermissions: [Permission],
+        newPermissions: [Permission]
+    ) {
+        self.name = name
+        self.inserts = []
+        self.deletes = []
+
+        for resource in resources {
+            let oldSet = Set(oldPermissions.first(where: { $0.resourceId == resource.id })?.actionIds ?? [])
+            let newSet = Set(newPermissions.first(where: { $0.resourceId == resource.id })?.actionIds ?? [])
+
+            let inserted = Array(newSet.subtracting(oldSet))
+            if !inserted.isEmpty {
+                inserts.append(Permission(resourceId: resource.id, actionIds: inserted))
+            }
+
+            let deleted = Array(oldSet.subtracting(newSet))
+            if !deleted.isEmpty {
+                deletes.append(Permission(resourceId: resource.id, actionIds: deleted))
+            }
+        }
+    }
+}
+
