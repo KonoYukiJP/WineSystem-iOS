@@ -136,7 +136,7 @@ struct Report: Identifiable, Decodable {
     var kindId: Int
     var featureId: Int?
     var value: Double?
-    var note: String?
+    var note: String
     
     private enum CodingKeys: String, CodingKey {
         case id, date

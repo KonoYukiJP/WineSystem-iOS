@@ -218,7 +218,7 @@ extension ReportUpdateRequest {
         self.kindId = report.kindId
         self.featureId = report.featureId
         self.value = report.value
-        self.note = report.note ?? ""
+        self.note = report.note
     }
 }
 extension RoleUpdateRequest {

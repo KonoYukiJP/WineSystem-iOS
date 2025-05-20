@@ -83,11 +83,8 @@ struct ReportListCell: View {
                 Text(users.first(where: { $0.id == report.userId})?.name ?? "?")
             }
             HStack {
-                Text("Work")
                 Text(works.first(where: { $0.id == report.workId})?.localizedName ?? "?")
-            }
-            HStack {
-                Text("Operation")
+                Text("-")
                 Text(operations.first(where: { $0.id == report.operationId})?.localizedName ?? "?")
             }
             Group {
@@ -109,10 +106,10 @@ struct ReportListCell: View {
                         Text(features.first(where: { $0.id == featureId})?.unit ?? "?")
                     }
                 }
-                if let note = report.note {
+                if !report.note.isEmpty {
                     HStack {
                         Text("Note")
-                        Text(note)
+                        Text(report.note)
                     }
                 }
             }
