@@ -236,6 +236,7 @@ struct ReportEditView: View {
                     Task {
                         do {
                             try await NetworkService.updateReport(reportId: report.id, reportUpdateRequest: newReportRequest)
+                            dismiss()
                         } catch {
                             alertManager.show(title: "Error", message: error.localizedDescription)
                         }
