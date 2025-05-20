@@ -153,8 +153,8 @@ struct NetworkService {
     static func createTank(systemId: Int, newTankRequest: NewTankRequest) async throws {
         try await post(path: "/systems/\(systemId)/tanks", body: newTankRequest)
     }
-    static func createReport(systemId: Int, newReportRequest: NewReportRequest) async throws {
-        try await post(path: "/systems/\(systemId)/reports", body: newReportRequest)
+    static func createReport(systemId: Int, reportCreateRequest: ReportCreateRequest) async throws {
+        try await post(path: "/systems/\(systemId)/reports", body: reportCreateRequest)
     }
     static func createBackup(backupCreateRequest: BackupCreateRequest) async throws {
         try await post(path: "/backups", body: backupCreateRequest)
@@ -199,8 +199,8 @@ struct NetworkService {
     static func updateUser(userId: Int, userUpdateRequest: UserUpdateRequest) async throws {
         try await put(path: "/users/\(userId)", body: userUpdateRequest)
     }
-    static func updateReport(reportId: Int, newReportRequest: NewReportRequest) async throws {
-        try await put(path: "/reports/\(reportId)", body: newReportRequest)
+    static func updateReport(reportId: Int, reportUpdateRequest: ReportUpdateRequest) async throws {
+        try await put(path: "/reports/\(reportId)", body: reportUpdateRequest)
     }
     static func updateBackup(backupUpdateRequest: BackupUpdateRequest) async throws {
         try await put(path: "/backups", body: backupUpdateRequest)

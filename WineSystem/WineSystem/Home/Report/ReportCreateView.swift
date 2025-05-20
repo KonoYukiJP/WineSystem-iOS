@@ -56,26 +56,30 @@ struct ReportCreateView: View {
 struct ReportPostView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("systemId") var systemId: Int = 0
-    @AppStorage("userId") var userId: Int = 0
     @AppStorage("username") var username: String = ""
     let work: Work
     let operation: Operation
     let feature: Feature?
     @State private var materials: [Material] = []
     @State private var tanks: [Tank] = []
-    @State private var newReportRequest = NewReportRequest()
+    @State private var reportCreateRequest: ReportCreateRequest
     @State private var alertManager = AlertManager()
     
     init(work: Work, operation: Operation, feature: Feature? = nil) {
-        self.feature = feature
         self.work = work
         self.operation = operation
+        self.feature = feature
+        _reportCreateRequest = State(initialValue: .init(
+            workId: work.id,
+            operationId: operation.id,
+            featureId: feature?.id
+        ))
     }
     
     private func getMaterials() async {
         do {
             materials = try await NetworkService.getMaterials(systemId: systemId)
-            newReportRequest.kindId = materials.first?.id ?? 0
+            reportCreateRequest.kindId = materials.first?.id ?? 0
         } catch let error as NSError {
             alertManager.show(
                 title: "\(error.code)",
@@ -86,7 +90,7 @@ struct ReportPostView: View {
     private func getTanks() async {
         do {
             tanks = try await NetworkService.getTanks(systemId: systemId)
-            newReportRequest.kindId = tanks.first?.id ?? 0
+            reportCreateRequest.kindId = tanks.first?.id ?? 0
         } catch let error as NSError {
             alertManager.show(
                 title: "\(error.code)",
@@ -94,20 +98,9 @@ struct ReportPostView: View {
             )
         }
     }
-    
     private func createReport() async {
-        let newReportRequest = NewReportRequest(
-            date: newReportRequest.date,
-            userId: userId,
-            workId: work.id,
-            operationId: operation.id,
-            kindId: newReportRequest.kindId,
-            featureId: feature?.id,
-            value: newReportRequest.value,
-            note: newReportRequest.note
-        )
         do {
-            try await NetworkService.createReport(systemId: systemId, newReportRequest: newReportRequest)
+            try await NetworkService.createReport(systemId: systemId, reportCreateRequest: reportCreateRequest)
             dismiss()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: error.localizedDescription)
@@ -121,7 +114,7 @@ struct ReportPostView: View {
                 Spacer()
                 Text(username)
             }
-            DatePicker("Date", selection: $newReportRequest.date)
+            DatePicker("Date", selection: $reportCreateRequest.date)
             
             Section {}
             HStack {
@@ -131,7 +124,7 @@ struct ReportPostView: View {
                 Text("Operation");Spacer();Text(operation.localizedName)
             }
             if operation.targetType == .material {
-                Picker(selection: $newReportRequest.kindId) {
+                Picker(selection: $reportCreateRequest.kindId) {
                     ForEach(materials) { material in
                         Text(material.name).tag(material.id)
                     }
@@ -142,7 +135,7 @@ struct ReportPostView: View {
                     await getMaterials()
                 }
             } else {
-                Picker(selection: $newReportRequest.kindId) {
+                Picker(selection: $reportCreateRequest.kindId) {
                     ForEach(tanks) { tank in
                         Text(tank.name).tag(tank.id)
                     }
@@ -157,13 +150,13 @@ struct ReportPostView: View {
             if let feature = feature {
                 HStack {
                     Text(feature.name)
-                    TextField("Value", value: $newReportRequest.value, format: .number)
+                    TextField("Value", value: $reportCreateRequest.value, format: .number)
                         .multilineTextAlignment(.trailing)
                     Text(feature.unit)
                 }
             }
             Section(header: Text("Note")) {
-                TextEditor(text: $newReportRequest.note)
+                TextEditor(text: $reportCreateRequest.note)
                     .frame(minHeight: 64)
             }
         }
@@ -181,6 +174,6 @@ struct ReportPostView: View {
 
 #Preview {
     NavigationStack {
-        ReportCreateView(work: Work(id: 2, name: "Work", operationIds: [1]))
+        ReportCreateView(work: Work(id: 2, name: "Work", operationIds: [4]))
     }.ja()
 }

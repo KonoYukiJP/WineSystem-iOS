@@ -10,6 +10,7 @@ import SwiftUI
 
 struct SystemCreateView: View {
     @Binding var isShowingSheet: Bool
+    let onCreateSystem: () -> Void
     @State private var systemCreateRequest = SystemCreateRequest()
     @State private var isShowingPicker = false
     @State private var confirmation: String = ""
@@ -43,6 +44,7 @@ struct SystemCreateView: View {
         if !validateSystemInfo() { return }
         do {
             try await NetworkService.createSystem(systemCreateRequest)
+            onCreateSystem()
             isShowingSheet = false
         } catch let error as NSError {
             if error.code == 400 {
@@ -137,5 +139,5 @@ struct SystemCreateView: View {
 }
 
 #Preview {
-    SystemCreateView(isShowingSheet: .constant(true)).ja()
+    SystemCreateView(isShowingSheet: .constant(true), onCreateSystem: {}).ja()
 }

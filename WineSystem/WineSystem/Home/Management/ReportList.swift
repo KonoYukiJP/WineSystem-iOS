@@ -125,7 +125,7 @@ struct ReportEditView: View {
     @Environment(\.dismiss) private var dismiss
     let systemId: Int
     let report: Report
-    @State var newReportRequest: NewReportRequest
+    @State var newReportRequest: ReportUpdateRequest
     let users: [Item]
     let works: [Work]
     let operations: [Operation]
@@ -235,7 +235,7 @@ struct ReportEditView: View {
                 Button("Save") {
                     Task {
                         do {
-                            try await NetworkService.updateReport(reportId: report.id, newReportRequest: newReportRequest)
+                            try await NetworkService.updateReport(reportId: report.id, reportUpdateRequest: newReportRequest)
                         } catch {
                             alertManager.show(title: "Error", message: error.localizedDescription)
                         }

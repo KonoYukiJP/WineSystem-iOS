@@ -78,7 +78,17 @@ struct AuthenticationView: View {
                     Button("New System") {
                         isShowingAdmiSheet = true
                     }
-                    .sheet(isPresented: $isShowingAdmiSheet, content: {SystemCreateView(isShowingSheet: $isShowingAdmiSheet)})
+                    .sheet(
+                        isPresented: $isShowingAdmiSheet,
+                        content: {
+                            SystemCreateView(
+                                isShowingSheet: $isShowingAdmiSheet,
+                                onCreateSystem: {
+                                    Task { await getSystems() }
+                                }
+                            )
+                        }
+                    )
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Login") {

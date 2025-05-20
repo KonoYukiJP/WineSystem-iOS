@@ -55,7 +55,23 @@ struct RoleCreateRequest: Encodable {
     let name: String
     let permissions: [Permission]
 }
-struct NewReportRequest: Encodable {
+struct ReportCreateRequest: Encodable {
+    var date: Date
+    var workId: Int
+    var operationId: Int
+    var kindId: Int
+    var featureId: Int?
+    var value: Double?
+    var note: String
+    private enum CodingKeys: String, CodingKey {
+        case date
+        case workId = "work_id"
+        case operationId = "operation_id"
+        case kindId = "kind_id"
+        case featureId = "feature_id", value,note
+    }
+}
+struct ReportUpdateRequest: Encodable {
     var date: Date
     var userId: Int
     var workId: Int
@@ -182,7 +198,18 @@ extension NewTankRequest {
         self.note = tank.note
     }
 }
-extension NewReportRequest {
+extension ReportCreateRequest {
+    init(workId: Int, operationId: Int, featureId: Int?) {
+        self.date = Date()
+        self.workId = workId
+        self.operationId = operationId
+        self.kindId = 0
+        self.featureId = featureId
+        self.value = nil
+        self.note = ""
+    }
+}
+extension ReportUpdateRequest {
     init(from report: Report) {
         self.date = report.date
         self.userId = report.userId
@@ -192,16 +219,6 @@ extension NewReportRequest {
         self.featureId = report.featureId
         self.value = report.value
         self.note = report.note ?? ""
-    }
-    init() {
-        self.date = Date()
-        self.userId = 0
-        self.workId = 0
-        self.operationId = 0
-        self.kindId = 0
-        self.featureId = nil
-        self.value = nil
-        self.note = ""
     }
 }
 extension RoleUpdateRequest {
