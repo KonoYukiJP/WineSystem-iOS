@@ -511,6 +511,17 @@
         }
       }
     },
+    "New Backup" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新規バックアップ"
+          }
+        }
+      }
+    },
     "New Material" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -763,7 +774,14 @@
       }
     },
     "Restore" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "復元"
+          }
+        }
+      }
     },
     "Retype Password" : {
       "extractionState" : "manual",

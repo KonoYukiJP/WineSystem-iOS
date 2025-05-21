@@ -89,8 +89,8 @@ struct NetworkService {
     static func getMaterialsAsItems(systemId: Int) async throws -> [Item] {
         return try await get(path: "/systems/\(systemId)/materials")
     }
-    static func getBackups() async throws -> Backup {
-        return try await get(path: "/backups")
+    static func getBackups(systemId: Int) async throws -> [Backup] {
+        return try await get(path: "/systems/\(systemId)/backups")
     }
     private static func post<T: Encodable>(path: String, body: T) async throws {
         guard let url = URL(string: "\(apiRootURL)\(path)") else {
@@ -156,8 +156,8 @@ struct NetworkService {
     static func createReport(systemId: Int, reportCreateRequest: ReportCreateRequest) async throws {
         try await post(path: "/systems/\(systemId)/reports", body: reportCreateRequest)
     }
-    static func createBackup(backupCreateRequest: BackupCreateRequest) async throws {
-        try await post(path: "/backups", body: backupCreateRequest)
+    static func createBackup(systemId: Int, backupCreateRequest: BackupCreateRequest) async throws {
+        try await post(path: "/systems/\(systemId)/backups", body: backupCreateRequest)
     }
     private static func put<T: Encodable>(path: String, body: T) async throws {
         guard let url = URL(string: "\(apiRootURL)\(path)") else {
@@ -202,8 +202,24 @@ struct NetworkService {
     static func updateReport(reportId: Int, reportUpdateRequest: ReportUpdateRequest) async throws {
         try await put(path: "/reports/\(reportId)", body: reportUpdateRequest)
     }
-    static func updateBackup(backupUpdateRequest: BackupUpdateRequest) async throws {
-        try await put(path: "/backups", body: backupUpdateRequest)
+    static func updateBackup(systemId: Int, filename: String) async throws {
+        guard let url = URL(string: "\(apiRootURL)/systems/\(systemId)/backups/\(filename)") else {
+            throw URLError(.badURL)
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if let token = UserDefaults.standard.string(forKey: "token") {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            let response = try JSONDecoder().decode(Response.self, from: data)
+            throw NSError(domain: NSURLErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: response.message])
+        }
     }
     private static func patch<T: Encodable>(path: String, body: T) async throws {
         guard let url = URL(string: "\(apiRootURL)\(path)") else {
@@ -275,7 +291,7 @@ struct NetworkService {
     static func deleteReport(reportId: Int) async throws {
         try await delete(path: "/reports/\(reportId)")
     }
-    static func deleteBackup(filename: String) async throws {
-        try await delete(path: "/backups/\(filename)")
+    static func deleteBackup(systemId: Int, filename: String) async throws {
+        try await delete(path: "/systems/\(systemId)/backups/\(filename)")
     }
 }

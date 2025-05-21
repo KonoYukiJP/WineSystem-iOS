@@ -149,8 +149,15 @@ struct Report: Identifiable, Decodable {
     }
 }
 
-struct Backup: Decodable {
-    var backups: [String]
+struct Backup: Identifiable, Decodable {
+    var id = UUID()
+    var filename: String
+    var createdAt: Date
+    var createdBy: String
+    var note: String
+    private enum CodingKeys: String, CodingKey {
+        case filename, createdAt = "created_at", createdBy = "created_by", note
+    }
 }
 
 var dateFormatter: DateFormatter {

@@ -120,10 +120,8 @@ struct RoleUpdateRequest: Encodable {
     var deletes: [Permission]
 }
 struct BackupCreateRequest: Encodable {
-    
-}
-struct BackupUpdateRequest: Encodable {
-    let filename: String
+    var username: String
+    var note: String
 }
 extension LoginRequest {
     init() {
@@ -249,3 +247,9 @@ extension RoleUpdateRequest {
     }
 }
 
+extension BackupCreateRequest {
+    init(username: String) {
+        self.username = username
+        self.note = ""
+    }
+}
