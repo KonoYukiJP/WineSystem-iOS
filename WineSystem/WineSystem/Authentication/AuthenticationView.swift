@@ -47,6 +47,17 @@ struct AuthenticationView: View {
     var body: some View {
         NavigationStack {
             Form {
+                VStack() {
+                    Image(systemName: "wineglass")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 44, height: 44)
+                }
+                .frame(maxWidth: .infinity)
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+                
+                Section {}
                 Picker(selection: $systemId) {
                     ForEach(systems) { system in
                         Text(system.name).tag(system.id)

@@ -30,6 +30,7 @@ struct UserSettingsView: View {
                 VStack() {
                     Image(systemName: "person")
                         .resizable()
+                        .scaledToFit()
                         .frame(width: 44, height: 44)
                     Text(username)
                 }

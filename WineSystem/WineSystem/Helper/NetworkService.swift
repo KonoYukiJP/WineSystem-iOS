@@ -185,7 +185,7 @@ struct NetworkService {
         try await put(path: "/users/me/name", body: usernameUpdateRequest)
     }
     static func updatePassword(passwordUpdateRequest: PasswordUpdateRequest) async throws {
-        try await put(path: "/users/ma/password", body: passwordUpdateRequest)
+        try await put(path: "/users/me/password", body: passwordUpdateRequest)
     }
     static func updateMaterial(materialId: Int, newMaterialRequest: NewMaterialRequest) async throws {
         try await put(path: "/materials/\(materialId)", body: newMaterialRequest)

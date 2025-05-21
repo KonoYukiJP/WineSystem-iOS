@@ -46,6 +46,7 @@ struct SystemSettingsView: View {
                 VStack() {
                     Image(systemName: "house")
                         .resizable()
+                        .scaledToFit()
                         .frame(width: 44, height: 44)
                     Text(system.name)
                 }
