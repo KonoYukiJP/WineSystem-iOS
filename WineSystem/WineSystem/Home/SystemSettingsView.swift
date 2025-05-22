@@ -9,14 +9,13 @@ import SwiftUI
 
 struct SystemSettingsView: View {
     @AppStorage("isLoggedIn") private var isLoggedIn = false
-    @AppStorage("systemId") private var systemId: Int = 0
     @Binding var isShowingSheet: Bool
     @State private var system: System = System(id: 0, name: "No System", year: 0)
     @State private var alertManager = AlertManager()
     
     private func getSystem() async {
         do {
-            system = try await NetworkService.getSystem(systemId: systemId)
+            system = try await NetworkService.getSystem()
         } catch let error as NSError {
             alertManager.show(
                 title: "Failed to fetch systems",
@@ -27,7 +26,7 @@ struct SystemSettingsView: View {
     private func deleteSystem() {
         Task {
             do {
-                try await NetworkService.deleteSystem(systemId: systemId)
+                try await NetworkService.deleteSystem()
                 UserDefaults.standard.removeObject(forKey: "systemId")
                 UserDefaults.standard.removeObject(forKey: "userId")
                 UserDefaults.standard.removeObject(forKey: "systemName")

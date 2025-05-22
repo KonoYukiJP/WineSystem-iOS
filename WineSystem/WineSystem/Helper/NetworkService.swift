@@ -8,37 +8,79 @@
 import Foundation
 
 struct NetworkService {
-    //astatic let apiRootURL: String = "http://127.0.0.1:5000"
+    //static let apiRootURL: String = "http://127.0.0.1:5000"
     //static let apiRootURL: String = "http://163.43.218.237"
     static let apiRootURL: String = "https://winesystem.servehttp.com"
     
-    private static func get<T: Decodable>(path: String) async throws -> T {
+    private static func request<T: Decodable>(
+        path: String,
+        method: String
+    ) async throws -> T {
         guard let url = URL(string: "\(apiRootURL)\(path)") else {
             throw URLError(.badURL)
         }
         var request = URLRequest(url: url)
-        request.httpMethod = "GET"
+        request.httpMethod = method
         if let token = UserDefaults.standard.string(forKey: "token") {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
         let (data, response) = try await URLSession.shared.data(for: request)
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
         guard let httpResponse = response as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
         }
         if (200...299).contains(httpResponse.statusCode) {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
             return try decoder.decode(T.self, from: data)
         } else {
             let response = try JSONDecoder().decode(Response.self, from: data)
             throw NSError(domain: NSURLErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: response.message])
         }
     }
+    private static func request<T: Decodable, U: Encodable>(
+        path: String,
+        method: String,
+        body: U
+    ) async throws -> T {
+        guard let url = URL(string: "\(apiRootURL)\(path)") else {
+            throw URLError(.badURL)
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        if let token = UserDefaults.standard.string(forKey: "token") {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        request.httpBody = try encoder.encode(body)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        if (200...299).contains(httpResponse.statusCode) {
+            return try JSONDecoder().decode(T.self, from: data)
+        } else {
+            let response = try JSONDecoder().decode(Response.self, from: data)
+            throw NSError(domain: NSURLErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: response.message])
+        }
+    }
+    
+    static func login(systemId: Int, loginRequest: LoginRequest) async throws -> String {
+        return try await request(path: "/systems/\(systemId)/login", method: "POST", body: loginRequest)
+    }
+    static func updateBackup(filename: String) async throws {
+        let _: Response = try await request(path: "/backups/\(filename)", method: "PUT")
+    }
+    
+    private static func get<T: Decodable>(path: String) async throws -> T {
+        return try await request(path: path, method: "GET")
+    }
     static func getSystems() async throws -> [System] {
         return try await get(path: "/systems")
     }
-    static func getSystem(systemId: Int) async throws -> System {
-        return try await get(path: "/systems/\(systemId)")
+    static func getSystem() async throws -> System {
+        return try await get(path: "/systems/me")
     }
     static func getUsers() async throws -> [User] {
         return try await get(path: "/users")
@@ -77,63 +119,12 @@ struct NetworkService {
     static func getReports() async throws -> [Report] {
         return try await get(path: "/reports")
     }
-    static func getUsersAsItems() async throws -> [Item] {
-        return try await get(path: "/users")
-    }
-    static func getFeaturesAsItems() async throws -> [Item] {
-        return try await get(path: "/features")
-    }
-    static func getTanksAsItems() async throws -> [Item] {
-        return try await get(path: "/tanks")
-    }
-    static func getMaterialsAsItems() async throws -> [Item] {
-        return try await get(path: "/materials")
-    }
     static func getBackups() async throws -> [Backup] {
         return try await get(path: "/backups")
     }
+    
     private static func post<T: Encodable>(path: String, body: T) async throws {
-        guard let url = URL(string: "\(apiRootURL)\(path)") else {
-            throw URLError(.badURL)
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        if let token = UserDefaults.standard.string(forKey: "token") {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        request.httpBody = try encoder.encode(body)
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-        guard (200...299).contains(httpResponse.statusCode) else {
-            let response = try JSONDecoder().decode(Response.self, from: data)
-            throw NSError(domain: NSURLErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: response.message])
-        }
-    }
-    static func login(systemId: Int, loginRequest: LoginRequest) async throws -> String {
-        guard let url = URL(string: "\(apiRootURL)/systems/\(systemId)/login") else {
-            throw URLError(.badURL)
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        let encoder = JSONEncoder()
-        request.httpBody = try encoder.encode(loginRequest)
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-        if (200...299).contains(httpResponse.statusCode) {
-            let loginResponse: LoginResponse = try JSONDecoder().decode(LoginResponse.self, from: data)
-            return loginResponse.token
-        } else {
-            let response = try JSONDecoder().decode(Response.self, from: data)
-            throw NSError(domain: NSURLErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: response.message])
-        }
+        let _: Response = try await request(path: path, method: "POST", body: body)
     }
     static func createSystem(_ systemCreateRequest: SystemCreateRequest) async throws {
         try await post(path: "/systems", body: systemCreateRequest)
@@ -159,27 +150,9 @@ struct NetworkService {
     static func createBackup(backupCreateRequest: BackupCreateRequest) async throws {
         try await post(path: "/backups", body: backupCreateRequest)
     }
+    
     private static func put<T: Encodable>(path: String, body: T) async throws {
-        guard let url = URL(string: "\(apiRootURL)\(path)") else {
-            throw URLError(.badURL)
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "PUT"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        if let token = UserDefaults.standard.string(forKey: "token") {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        request.httpBody = try encoder.encode(body)
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-        guard (200...299).contains(httpResponse.statusCode) else {
-            let response = try JSONDecoder().decode(Response.self, from: data)
-            throw NSError(domain: NSURLErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: response.message])
-        }
+        let _: Response = try await request(path: path, method: "PUT", body: body)
     }
     static func updateUsername(usernameUpdateRequest: UsernameUpdateRequest) async throws {
         try await put(path: "/users/me/name", body: usernameUpdateRequest)
@@ -202,46 +175,9 @@ struct NetworkService {
     static func updateReport(reportId: Int, reportUpdateRequest: ReportUpdateRequest) async throws {
         try await put(path: "/reports/\(reportId)", body: reportUpdateRequest)
     }
-    static func updateBackup(filename: String) async throws {
-        guard let url = URL(string: "\(apiRootURL)/backups/\(filename)") else {
-            throw URLError(.badURL)
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "PUT"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        if let token = UserDefaults.standard.string(forKey: "token") {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-        guard (200...299).contains(httpResponse.statusCode) else {
-            let response = try JSONDecoder().decode(Response.self, from: data)
-            throw NSError(domain: NSURLErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: response.message])
-        }
-    }
+    
     private static func patch<T: Encodable>(path: String, body: T) async throws {
-        guard let url = URL(string: "\(apiRootURL)\(path)") else {
-            throw URLError(.badURL)
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "PATCH"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        if let token = UserDefaults.standard.string(forKey: "token") {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        request.httpBody = try encoder.encode(body)
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-        guard (200...299).contains(httpResponse.statusCode) else {
-            let response = try JSONDecoder().decode(Response.self, from: data)
-            throw NSError(domain: NSURLErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: response.message])
-        }
+        let _: Response = try await request(path: path, method: "PATCH", body: body)
     }
     static func updateSystemName(systemId: Int, systemNameUpdateRequest: SystemNameUpdateRequest) async throws {
         try await patch(path: "/systems/\(systemId)", body: systemNameUpdateRequest)
@@ -252,26 +188,12 @@ struct NetworkService {
     static func updateRole(roleId: Int, roleUpdateRequest: RoleUpdateRequest) async throws {
         try await patch(path: "/roles/\(roleId)", body: roleUpdateRequest)
     }
+    
     private static func delete(path: String) async throws {
-        guard let url = URL(string: "\(apiRootURL)\(path)") else {
-            throw URLError(.badURL)
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        if let token = UserDefaults.standard.string(forKey: "token") {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-        guard (200...299).contains(httpResponse.statusCode) else {
-            let response = try JSONDecoder().decode(Response.self, from: data)
-            throw NSError(domain: NSURLErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: response.message])
-        }
+        let _: Response = try await request(path: path, method: "DELETE")
     }
-    static func deleteSystem(systemId: Int) async throws {
-        try await delete(path: "/systems/\(systemId)")
+    static func deleteSystem() async throws {
+        try await delete(path: "/systems/me")
     }
     static func deleteUser(userId: Int) async throws {
         try await delete(path: "/users/\(userId)")

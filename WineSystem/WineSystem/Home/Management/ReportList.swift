@@ -9,23 +9,23 @@ import SwiftUI
 
 struct ReportList: View {
     @State private var reports: [Report] = []
-    @State private var users: [Item] = []
+    @State private var users: [User] = []
     @State private var works: [Work] = []
     @State private var operations: [Operation] = []
     @State private var features: [Feature] = []
-    @State private var materials: [Item] = []
-    @State private var tanks: [Item] = []
+    @State private var materials: [Material] = []
+    @State private var tanks: [Tank] = []
     @State private var alertManager = AlertManager()
     
     private func getReports() async {
         do {
             reports = try await NetworkService.getReports()
-            users = try await NetworkService.getUsersAsItems()
+            users = try await NetworkService.getUsers()
             works = try await NetworkService.getWorks()
             operations = try await NetworkService.getOperations()
             features = try await NetworkService.getFeatures()
-            materials = try await NetworkService.getMaterialsAsItems()
-            tanks = try await NetworkService.getTanksAsItems()
+            materials = try await NetworkService.getMaterials()
+            tanks = try await NetworkService.getTanks()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: error.localizedDescription)
         }
@@ -67,12 +67,12 @@ struct ReportList: View {
 
 struct ReportListCell: View {
     let report: Report
-    let users: [Item]
+    let users: [User]
     let works: [Work]
     let operations: [Operation]
     let features: [Feature]
-    let materials: [Item]
-    let tanks: [Item]
+    let materials: [Material]
+    let tanks: [Tank]
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -120,15 +120,15 @@ struct ReportEditView: View {
     @Environment(\.dismiss) private var dismiss
     let report: Report
     @State var newReportRequest: ReportUpdateRequest
-    let users: [Item]
+    let users: [User]
     let works: [Work]
     let operations: [Operation]
     let features: [Feature]
-    let materials: [Item]
-    let tanks: [Item]
+    let materials: [Material]
+    let tanks: [Tank]
     @State private var alertManager = AlertManager()
     
-    init(report: Report, users: [Item], works: [Work], operations: [Operation], features: [Feature], materials: [Item], tanks: [Item]) {
+    init(report: Report, users: [User], works: [Work], operations: [Operation], features: [Feature], materials: [Material], tanks: [Tank]) {
         self.report = report
         _newReportRequest = State(initialValue: .init(from: report))
         self.users = users
