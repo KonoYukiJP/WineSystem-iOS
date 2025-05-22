@@ -27,8 +27,6 @@ struct SystemSettingsView: View {
         Task {
             do {
                 try await NetworkService.deleteSystem()
-                UserDefaults.standard.removeObject(forKey: "systemId")
-                UserDefaults.standard.removeObject(forKey: "userId")
                 UserDefaults.standard.removeObject(forKey: "systemName")
                 UserDefaults.standard.removeObject(forKey: "username")
                 isLoggedIn = false

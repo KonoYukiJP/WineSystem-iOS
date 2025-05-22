@@ -62,8 +62,6 @@ struct UserSettingsView: View {
                 
                 Section {}
                 Button("Logout") {
-                    UserDefaults.standard.removeObject(forKey: "systemId")
-                    UserDefaults.standard.removeObject(forKey: "userId")
                     UserDefaults.standard.removeObject(forKey: "systemName")
                     UserDefaults.standard.removeObject(forKey: "username")
                     isShowingSheet = false

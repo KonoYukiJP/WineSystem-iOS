@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct UserList: View {
-    @AppStorage("userId") private var userId: Int = 0
     @State private var users: [User] = []
     @State private var roles: [Role] = []
     @State private var alertManager = AlertManager()

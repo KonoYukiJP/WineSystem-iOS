@@ -34,7 +34,6 @@ struct AuthenticationView: View {
     private func login() async {
         do {
             let token = try await NetworkService.login(systemId: systemId, loginRequest: loginRequest)
-            UserDefaults.standard.set(systemId, forKey: "systemId")
             UserDefaults.standard.set(systems.first(where: { $0.id == systemId })!.name, forKey: "systemName")
             UserDefaults.standard.set(loginRequest.username, forKey: "username")
             UserDefaults.standard.set(token, forKey: "token")
