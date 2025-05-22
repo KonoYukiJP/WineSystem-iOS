@@ -8,14 +8,13 @@
 import SwiftUI
 
 struct MaterialList: View {
-    @AppStorage("systemId") private var systemId: Int = 0
     @State private var materials: [Material] = []
     @State private var alertManager = AlertManager()
     @State private var isShowingSheet = false
     
     private func getMaterials() async {
         do {
-            materials = try await NetworkService.getMaterials(systemId: systemId)
+            materials = try await NetworkService.getMaterials()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: error.localizedDescription)
         }
@@ -67,7 +66,6 @@ struct MaterialList: View {
         .sheet(isPresented: $isShowingSheet) {
             MaterialCreateView(
                 isShowingSheet: $isShowingSheet,
-                systemId: systemId,
                 onCreateMaterial: {
                     Task { await getMaterials() }
                 }
@@ -78,7 +76,6 @@ struct MaterialList: View {
 
 struct MaterialCreateView: View {
     @Binding var isShowingSheet: Bool
-    let systemId: Int
     let onCreateMaterial: () -> Void
     @State private var name = ""
     @State private var note = ""
@@ -93,7 +90,6 @@ struct MaterialCreateView: View {
         }
         do {
             try await NetworkService.createMaterial(
-                systemId: systemId,
                 newMaterialRequest: .init(
                     name: name,
                     note: note

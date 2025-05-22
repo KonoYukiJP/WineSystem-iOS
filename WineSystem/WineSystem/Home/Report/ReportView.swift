@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct ReportView: View {
-    @AppStorage("systemId") private var systemId: Int = 0
     @AppStorage("systemName") private var systemName = "No System"
     @AppStorage("username") private var username = "No Name"
     @State var isShowingSystemSettingsView = false

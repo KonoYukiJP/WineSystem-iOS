@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct RoleList: View {
-    @AppStorage("systemId") private var systemId: Int = 0
     @State private var roles: [Role] = []
     @State private var resources: [Resource] = []
     @State private var actions: [Action] = []
@@ -19,7 +18,7 @@ struct RoleList: View {
         do {
             resources = try await NetworkService.getResources()
             actions = try await NetworkService.getActions()
-            roles = try await NetworkService.getRoles(systemId: systemId)
+            roles = try await NetworkService.getRoles()
         } catch let error as NSError {
             alertManager.show(
                 title: "\(error.code)",
@@ -77,7 +76,6 @@ struct RoleList: View {
         .sheet(isPresented: $isShowingSheet) {
             RoleCreateView(
                 isShowingSheet: $isShowingSheet,
-                systemId: systemId,
                 onCreateRole: {
                     Task { await getRoles() }
                 },
@@ -214,7 +212,6 @@ struct RoleEditView: View {
 
 struct RoleCreateView: View {
     @Binding var isShowingSheet: Bool
-    let systemId: Int
     let onCreateRole: () -> Void
     @State private var name = ""
     @State private var isAlertingRoleName = false
@@ -224,9 +221,8 @@ struct RoleCreateView: View {
     @State private var alertManager = AlertManager()
     @FocusState private var isFocused: Bool
     
-    init(isShowingSheet: Binding<Bool>, systemId: Int, onCreateRole: @escaping () -> Void, resources: [Resource], actions: [Action]) {
+    init(isShowingSheet: Binding<Bool>, onCreateRole: @escaping () -> Void, resources: [Resource], actions: [Action]) {
         _isShowingSheet = isShowingSheet
-        self.systemId = systemId
         self.onCreateRole = onCreateRole
         self.resources = resources
         self.actions = actions
@@ -240,7 +236,7 @@ struct RoleCreateView: View {
         }
         let roleCreateRequest = RoleCreateRequest(name: name, permissions: permissions.toPermissions())
         do {
-            try await NetworkService.createRole(systemId: systemId, roleCreateRequest: roleCreateRequest)
+            try await NetworkService.createRole(roleCreateRequest: roleCreateRequest)
             onCreateRole()
             isShowingSheet = false
         } catch let error as NSError {

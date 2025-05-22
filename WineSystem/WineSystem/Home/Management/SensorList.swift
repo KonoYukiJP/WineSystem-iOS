@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct SensorList: View {
-    @AppStorage("systemId") private var systemId: Int = 0
     @State private var sensors: [Sensor] = []
     @State private var tanks: [Tank] = []
     @State private var alertManager = AlertManager()
@@ -16,14 +15,14 @@ struct SensorList: View {
     
     private func getSensors() async {
         do {
-            sensors = try await NetworkService.getSensors(systemId: systemId)
+            sensors = try await NetworkService.getSensors()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: error.localizedDescription)
         }
     }
     private func getTanks() async {
         do {
-            tanks = try await NetworkService.getTanks(systemId: systemId)
+            tanks = try await NetworkService.getTanks()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: error.localizedDescription)
         }
@@ -92,7 +91,6 @@ struct SensorList: View {
         .sheet(isPresented: $isShowingSheet) {
             SensorCreateView(
                 isShowingSheet: $isShowingSheet,
-                systemId: systemId,
                 tanks: tanks,
                 onCreateSensor: {
                     Task { await getSensors() }
@@ -208,7 +206,6 @@ struct SensorEditView: View {
 
 struct SensorCreateView: View {
     @Binding var isShowingSheet: Bool
-    let systemId: Int
     let tanks: [Tank]
     let onCreateSensor: () -> Void
     @State private var name = ""
@@ -234,7 +231,7 @@ struct SensorCreateView: View {
             date: date
         )
         do {
-            try await NetworkService.createSensor(systemId: systemId, newSensorRequest: newSensorRequest)
+            try await NetworkService.createSensor(newSensorRequest: newSensorRequest)
             onCreateSensor()
             isShowingSheet = false
         } catch let error as NSError {

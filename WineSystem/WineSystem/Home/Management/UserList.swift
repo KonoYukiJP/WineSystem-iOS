@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct UserList: View {
-    @AppStorage("systemId") private var systemId: Int = 0
     @AppStorage("userId") private var userId: Int = 0
     @State private var users: [User] = []
     @State private var roles: [Role] = []
@@ -17,8 +16,8 @@ struct UserList: View {
     
     private func getUsers() async {
         do {
-            users = try await NetworkService.getUsers(systemId: systemId)
-            roles = try await NetworkService.getRoles(systemId: systemId)
+            users = try await NetworkService.getUsers()
+            roles = try await NetworkService.getRoles()
         } catch let error as NSError {
             alertManager.show(
                 title: "\(error.code)",
@@ -64,7 +63,6 @@ struct UserList: View {
         .sheet(isPresented: $isShowingSheet, content: {
             UserCreateView(
                 isShowingSheet: $isShowingSheet,
-                systemId: systemId,
                 roles: roles,
                 onCreateUser: {
                     Task { await getUsers() }
@@ -159,7 +157,6 @@ struct UserEditView: View {
 
 struct UserCreateView: View {
     @Binding var isShowingSheet: Bool
-    let systemId: Int
     let roles: [Role]
     let onCreateUser: () -> Void
     @State private var userCreateRequest = UserCreateRequest()
@@ -189,7 +186,7 @@ struct UserCreateView: View {
     
     private func createUser() async {
         do {
-            try await NetworkService.createUser(systemId: systemId, userCreateRequest: userCreateRequest)
+            try await NetworkService.createUser(userCreateRequest: userCreateRequest)
             onCreateUser()
             isShowingSheet = false
         } catch let error as NSError {

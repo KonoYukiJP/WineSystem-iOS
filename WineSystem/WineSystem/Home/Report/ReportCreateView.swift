@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct ReportCreateView: View {
-    @AppStorage("systemId") var systemId: Int = 0
     let work: Work
     @State private var operations: [Operation] = []
     @State private var alertManager = AlertManager()
@@ -55,7 +54,6 @@ struct ReportCreateView: View {
 
 struct ReportPostView: View {
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("systemId") var systemId: Int = 0
     @AppStorage("username") var username: String = ""
     let work: Work
     let operation: Operation
@@ -78,7 +76,7 @@ struct ReportPostView: View {
     
     private func getMaterials() async {
         do {
-            materials = try await NetworkService.getMaterials(systemId: systemId)
+            materials = try await NetworkService.getMaterials()
             reportCreateRequest.kindId = materials.first?.id ?? 0
         } catch let error as NSError {
             alertManager.show(
@@ -89,7 +87,7 @@ struct ReportPostView: View {
     }
     private func getTanks() async {
         do {
-            tanks = try await NetworkService.getTanks(systemId: systemId)
+            tanks = try await NetworkService.getTanks()
             reportCreateRequest.kindId = tanks.first?.id ?? 0
         } catch let error as NSError {
             alertManager.show(
@@ -100,7 +98,7 @@ struct ReportPostView: View {
     }
     private func createReport() async {
         do {
-            try await NetworkService.createReport(systemId: systemId, reportCreateRequest: reportCreateRequest)
+            try await NetworkService.createReport(reportCreateRequest: reportCreateRequest)
             dismiss()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: error.localizedDescription)

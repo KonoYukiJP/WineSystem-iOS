@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct TankList: View {
-    @AppStorage("systemId") private var systemId: Int = 0
     @State private var tanks: [Tank] = []
     @State private var materials: [Material] = []
     @State private var alertManager = AlertManager()
@@ -16,14 +15,14 @@ struct TankList: View {
     
     private func getTanks() async {
         do {
-            tanks = try await NetworkService.getTanks(systemId: systemId)
+            tanks = try await NetworkService.getTanks()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: error.localizedDescription)
         }
     }
     private func getMaterials() async {
         do {
-            materials = try await NetworkService.getMaterials(systemId: systemId)
+            materials = try await NetworkService.getMaterials()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: error.localizedDescription)
         }
@@ -83,7 +82,6 @@ struct TankList: View {
         .sheet(isPresented: $isShowingSheet) {
             TankCreateView(
                 isShowingSheet: $isShowingSheet,
-                systemId: systemId,
                 materials: materials,
                 onCreateTank: {
                     Task {
@@ -186,7 +184,6 @@ struct TankEditView: View {
 
 private struct TankCreateView: View {
     @Binding var isShowingSheet: Bool
-    let systemId: Int
     let materials: [Material]
     let onCreateTank: () -> Void
     @State private var name = ""
@@ -207,7 +204,7 @@ private struct TankCreateView: View {
             materialId: materialId
         )
         do {
-            try await NetworkService.createTank(systemId: systemId, newTankRequest: newTankRequest)
+            try await NetworkService.createTank(newTankRequest: newTankRequest)
             onCreateTank()
             isShowingSheet = false
         } catch let error as NSError {

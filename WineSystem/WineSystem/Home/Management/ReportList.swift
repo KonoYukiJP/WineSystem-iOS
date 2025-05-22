@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct ReportList: View {
-    @AppStorage("systemId") private var systemId: Int = 0
     @State private var reports: [Report] = []
     @State private var users: [Item] = []
     @State private var works: [Work] = []
@@ -20,13 +19,13 @@ struct ReportList: View {
     
     private func getReports() async {
         do {
-            reports = try await NetworkService.getReports(systemId: systemId)
-            users = try await NetworkService.getUsersAsItems(systemId: systemId)
+            reports = try await NetworkService.getReports()
+            users = try await NetworkService.getUsersAsItems()
             works = try await NetworkService.getWorks()
             operations = try await NetworkService.getOperations()
             features = try await NetworkService.getFeatures()
-            materials = try await NetworkService.getMaterialsAsItems(systemId: systemId)
-            tanks = try await NetworkService.getTanksAsItems(systemId: systemId)
+            materials = try await NetworkService.getMaterialsAsItems()
+            tanks = try await NetworkService.getTanksAsItems()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: error.localizedDescription)
         }
@@ -36,7 +35,6 @@ struct ReportList: View {
             ForEach(reports) { report in
                 NavigationLink(
                     destination: ReportEditView(
-                        systemId: systemId,
                         report: report,
                         users: users,
                         works: works,
@@ -120,7 +118,6 @@ struct ReportListCell: View {
 
 struct ReportEditView: View {
     @Environment(\.dismiss) private var dismiss
-    let systemId: Int
     let report: Report
     @State var newReportRequest: ReportUpdateRequest
     let users: [Item]
@@ -131,8 +128,7 @@ struct ReportEditView: View {
     let tanks: [Item]
     @State private var alertManager = AlertManager()
     
-    init(systemId: Int, report: Report, users: [Item], works: [Work], operations: [Operation], features: [Feature], materials: [Item], tanks: [Item]) {
-        self.systemId = systemId
+    init(report: Report, users: [Item], works: [Work], operations: [Operation], features: [Feature], materials: [Item], tanks: [Item]) {
         self.report = report
         _newReportRequest = State(initialValue: .init(from: report))
         self.users = users

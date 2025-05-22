@@ -8,7 +8,7 @@
 import Foundation
 
 struct NetworkService {
-    //static let apiRootURL: String = "http://127.0.0.1:5000"
+    //astatic let apiRootURL: String = "http://127.0.0.1:5000"
     //static let apiRootURL: String = "http://163.43.218.237"
     static let apiRootURL: String = "https://winesystem.servehttp.com"
     
@@ -40,15 +40,15 @@ struct NetworkService {
     static func getSystem(systemId: Int) async throws -> System {
         return try await get(path: "/systems/\(systemId)")
     }
-    static func getUsers(systemId: Int) async throws -> [User] {
-        return try await get(path: "/systems/\(systemId)/users")
+    static func getUsers() async throws -> [User] {
+        return try await get(path: "/users")
     }
     static func getUsername() async throws -> String {
         let username: String = try await get(path: "/users/me/name")
         return username
     }
-    static func getRoles(systemId: Int) async throws -> [Role] {
-        return try await get(path: "/systems/\(systemId)/roles")
+    static func getRoles() async throws -> [Role] {
+        return try await get(path: "/roles")
     }
     static func getActions() async throws -> [Action] {
         return try await get(path: "/actions")
@@ -56,14 +56,14 @@ struct NetworkService {
     static func getResources() async throws -> [Resource] {
         return try await get(path: "/resources")
     }
-    static func getTanks(systemId: Int) async throws -> [Tank] {
-        return try await get(path: "/systems/\(systemId)/tanks")
+    static func getTanks() async throws -> [Tank] {
+        return try await get(path: "/tanks")
     }
-    static func getMaterials(systemId: Int) async throws -> [Material] {
-        return try await get(path: "/systems/\(systemId)/materials")
+    static func getMaterials() async throws -> [Material] {
+        return try await get(path: "/materials")
     }
-    static func getSensors(systemId: Int) async throws -> [Sensor] {
-        return try await get(path: "/systems/\(systemId)/sensors")
+    static func getSensors() async throws -> [Sensor] {
+        return try await get(path: "/sensors")
     }
     static func getWorks() async throws -> [Work] {
         return try await get(path: "/works")
@@ -74,23 +74,23 @@ struct NetworkService {
     static func getFeatures() async throws -> [Feature] {
         return try await get(path: "/features")
     }
-    static func getReports(systemId: Int) async throws -> [Report] {
-        return try await get(path: "/systems/\(systemId)/reports")
+    static func getReports() async throws -> [Report] {
+        return try await get(path: "/reports")
     }
-    static func getUsersAsItems(systemId: Int) async throws -> [Item] {
-        return try await get(path: "/systems/\(systemId)/users")
+    static func getUsersAsItems() async throws -> [Item] {
+        return try await get(path: "/users")
     }
     static func getFeaturesAsItems() async throws -> [Item] {
         return try await get(path: "/features")
     }
-    static func getTanksAsItems(systemId: Int) async throws -> [Item] {
-        return try await get(path: "/systems/\(systemId)/tanks")
+    static func getTanksAsItems() async throws -> [Item] {
+        return try await get(path: "/tanks")
     }
-    static func getMaterialsAsItems(systemId: Int) async throws -> [Item] {
-        return try await get(path: "/systems/\(systemId)/materials")
+    static func getMaterialsAsItems() async throws -> [Item] {
+        return try await get(path: "/materials")
     }
-    static func getBackups(systemId: Int) async throws -> [Backup] {
-        return try await get(path: "/systems/\(systemId)/backups")
+    static func getBackups() async throws -> [Backup] {
+        return try await get(path: "/backups")
     }
     private static func post<T: Encodable>(path: String, body: T) async throws {
         guard let url = URL(string: "\(apiRootURL)\(path)") else {
@@ -138,26 +138,26 @@ struct NetworkService {
     static func createSystem(_ systemCreateRequest: SystemCreateRequest) async throws {
         try await post(path: "/systems", body: systemCreateRequest)
     }
-    static func createUser(systemId: Int, userCreateRequest: UserCreateRequest) async throws {
-        try await post(path: "/systems/\(systemId)/users", body: userCreateRequest)
+    static func createUser(userCreateRequest: UserCreateRequest) async throws {
+        try await post(path: "/users", body: userCreateRequest)
     }
-    static func createMaterial(systemId: Int, newMaterialRequest: NewMaterialRequest) async throws {
-        try await post(path: "/systems/\(systemId)/materials", body: newMaterialRequest)
+    static func createMaterial(newMaterialRequest: NewMaterialRequest) async throws {
+        try await post(path: "/materials", body: newMaterialRequest)
     }
-    static func createSensor(systemId: Int, newSensorRequest: NewSensorRequest) async throws {
-        try await post(path: "/systems/\(systemId)/sensors", body: newSensorRequest)
+    static func createSensor(newSensorRequest: NewSensorRequest) async throws {
+        try await post(path: "/sensors", body: newSensorRequest)
     }
-    static func createRole(systemId: Int, roleCreateRequest: RoleCreateRequest) async throws {
-        try await post(path: "/systems/\(systemId)/roles", body: roleCreateRequest)
+    static func createRole(roleCreateRequest: RoleCreateRequest) async throws {
+        try await post(path: "/roles", body: roleCreateRequest)
     }
-    static func createTank(systemId: Int, newTankRequest: NewTankRequest) async throws {
-        try await post(path: "/systems/\(systemId)/tanks", body: newTankRequest)
+    static func createTank(newTankRequest: NewTankRequest) async throws {
+        try await post(path: "/tanks", body: newTankRequest)
     }
-    static func createReport(systemId: Int, reportCreateRequest: ReportCreateRequest) async throws {
-        try await post(path: "/systems/\(systemId)/reports", body: reportCreateRequest)
+    static func createReport(reportCreateRequest: ReportCreateRequest) async throws {
+        try await post(path: "/reports", body: reportCreateRequest)
     }
-    static func createBackup(systemId: Int, backupCreateRequest: BackupCreateRequest) async throws {
-        try await post(path: "/systems/\(systemId)/backups", body: backupCreateRequest)
+    static func createBackup(backupCreateRequest: BackupCreateRequest) async throws {
+        try await post(path: "/backups", body: backupCreateRequest)
     }
     private static func put<T: Encodable>(path: String, body: T) async throws {
         guard let url = URL(string: "\(apiRootURL)\(path)") else {
@@ -202,8 +202,8 @@ struct NetworkService {
     static func updateReport(reportId: Int, reportUpdateRequest: ReportUpdateRequest) async throws {
         try await put(path: "/reports/\(reportId)", body: reportUpdateRequest)
     }
-    static func updateBackup(systemId: Int, filename: String) async throws {
-        guard let url = URL(string: "\(apiRootURL)/systems/\(systemId)/backups/\(filename)") else {
+    static func updateBackup(filename: String) async throws {
+        guard let url = URL(string: "\(apiRootURL)/backups/\(filename)") else {
             throw URLError(.badURL)
         }
         var request = URLRequest(url: url)
@@ -291,7 +291,7 @@ struct NetworkService {
     static func deleteReport(reportId: Int) async throws {
         try await delete(path: "/reports/\(reportId)")
     }
-    static func deleteBackup(systemId: Int, filename: String) async throws {
-        try await delete(path: "/systems/\(systemId)/backups/\(filename)")
+    static func deleteBackup(filename: String) async throws {
+        try await delete(path: "/backups/\(filename)")
     }
 }

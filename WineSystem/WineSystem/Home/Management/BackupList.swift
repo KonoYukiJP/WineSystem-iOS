@@ -8,14 +8,13 @@
 import SwiftUI
 
 struct BackupList: View {
-    @AppStorage("systemId") private var systemId: Int = 0
     @State private var alertManager = AlertManager()
     @State private var backups: [Backup] = []
     @State private var isShowingSheet: Bool = false
     
     private func getBackups() async {
         do {
-            backups = try await NetworkService.getBackups(systemId: systemId)
+            backups = try await NetworkService.getBackups()
         } catch let error as NSError {
             alertManager.show(title: "\(error.code)", message: error.localizedDescription)
         }
@@ -23,7 +22,7 @@ struct BackupList: View {
     private func deleteBackup(at offsets: IndexSet) {
         Task {
             do {
-                try await NetworkService.deleteBackup(systemId: systemId, filename: backups[offsets.first!].filename)
+                try await NetworkService.deleteBackup(filename: backups[offsets.first!].filename)
                 backups.remove(atOffsets: offsets)
             } catch let error as NSError {
                 alertManager.show(title: "\(error.code)", message: error.localizedDescription)
@@ -33,7 +32,7 @@ struct BackupList: View {
     private func restore(filename: String) {
         Task {
             do {
-                try await NetworkService.updateBackup(systemId: systemId, filename: filename)
+                try await NetworkService.updateBackup(filename: filename)
             } catch let error as NSError {
                 alertManager.show(title: "\(error.code)", message: error.localizedDescription)
             }
@@ -76,7 +75,6 @@ struct BackupList: View {
         .sheet(isPresented: $isShowingSheet) {
             BackupCreateView(
                 isShowingSheet: $isShowingSheet,
-                systemId: systemId,
                 onCreateBackup: {
                     Task { await getBackups() }
                 }
@@ -87,15 +85,13 @@ struct BackupList: View {
 
 struct BackupCreateView: View {
     @Binding var isShowingSheet: Bool
-    let systemId: Int
     let onCreateBackup: () -> Void
     @State private var backupCreateRequest: BackupCreateRequest
     @State private var alertManager = AlertManager()
     @FocusState private var isFocused: Bool
     
-    init(isShowingSheet: Binding<Bool>, systemId: Int, onCreateBackup: @escaping () -> Void) {
+    init(isShowingSheet: Binding<Bool>, onCreateBackup: @escaping () -> Void) {
         _isShowingSheet = isShowingSheet
-        self.systemId = systemId
         _backupCreateRequest = State(initialValue: .init(username: UserDefaults.standard.string(forKey: "username") ?? "??"))
         self.onCreateBackup = onCreateBackup
     }
@@ -103,7 +99,6 @@ struct BackupCreateView: View {
     private func createBackup() async {
         do {
             try await NetworkService.createBackup(
-                systemId: systemId,
                 backupCreateRequest: backupCreateRequest
             )
             onCreateBackup()
